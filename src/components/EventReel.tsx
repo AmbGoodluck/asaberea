@@ -69,6 +69,7 @@ function useReel(speed: number) {
     measure();
     window.addEventListener("resize", measure);
 
+    let running = false;
     const loop = () => {
       if (!dragging) {
         const tg = hover ? 0 : base;
@@ -80,7 +81,23 @@ function useReel(speed: number) {
       track.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+    const start = () => {
+      if (running || document.hidden) return;
+      running = true;
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    // Pause the marquee when it scrolls off screen or the tab is hidden.
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { rootMargin: "150px" }
+    );
+    io.observe(reel);
+    const onVis = () => (document.hidden ? stop() : start());
+    document.addEventListener("visibilitychange", onVis);
 
     const down = (e: PointerEvent) => {
       dragging = true;
@@ -127,6 +144,8 @@ function useReel(speed: number) {
     reel.addEventListener("mouseleave", leave);
 
     return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", measure);
       reel.removeEventListener("pointerdown", down);

@@ -161,7 +161,7 @@ export async function buildStoryCard(opts: {
   // Caption
   if (opts.caption) {
     ctx.fillStyle = "#F3ECDD";
-    ctx.font = '500 44px "Newsreader", Georgia, serif';
+    ctx.font = '500 44px Georgia, "Times New Roman", serif';
     const lines = wrapLines(ctx, opts.caption, cardW, 3);
     lines.forEach((ln, i) => ctx.fillText(ln, W / 2, sy + 90 + i * 58));
   }

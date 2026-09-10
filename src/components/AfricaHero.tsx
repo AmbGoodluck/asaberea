@@ -31,6 +31,7 @@ export default function AfricaHero() {
     if (reduce) return;
 
     let raf = 0;
+    let running = false;
     let tx = 0, ty = 0, cx = 0, cy = 0;
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
@@ -43,9 +44,28 @@ export default function AfricaHero() {
       el.style.transform = `rotateY(${cx}deg) rotateX(${-cy}deg)`;
       raf = requestAnimationFrame(loop);
     };
-    window.addEventListener("pointermove", onMove);
-    raf = requestAnimationFrame(loop);
+    // Only animate while the hero is on screen and the tab is visible.
+    const start = () => {
+      if (running || document.hidden) return;
+      running = true;
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { rootMargin: "120px" }
+    );
+    io.observe(el);
+    const onVis = () => (document.hidden ? stop() : start());
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pointermove", onMove, { passive: true });
+
     return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
     };

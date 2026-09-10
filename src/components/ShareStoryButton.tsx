@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { buildStoryCard } from "@/lib/story-card";
 import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from "@/lib/links";
 
 type State = "idle" | "working" | "shared" | "saved" | "error";
@@ -23,6 +22,7 @@ export default function ShareStoryButton({
     if (state === "working") return;
     setState("working");
     try {
+      const { buildStoryCard } = await import("@/lib/story-card");
       const blob = await buildStoryCard({
         imageUrl,
         caption,

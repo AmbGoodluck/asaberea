@@ -1,16 +1,17 @@
 /** @type {import('next').NextConfig} */
 
-// Content Security Policy. Scoped to what the site actually loads:
-// Next.js runtime, Google Fonts, and Firebase (Auth popup, Firestore, Storage).
+// Content Security Policy. Scoped to what the site actually loads: the Next.js
+// runtime and Firebase Auth (only on /admin). Fonts are self-hosted via
+// next/font, so no Google Fonts hosts. No 'unsafe-eval' (not needed in prod).
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self' https://berea.campusgroups.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  "script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   "img-src 'self' data: blob:",
   "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com",
   "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://apis.google.com",

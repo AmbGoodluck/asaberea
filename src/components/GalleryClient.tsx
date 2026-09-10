@@ -85,6 +85,7 @@ function GalleryTile({
 
 export default function GalleryClient({ items }: { items: GalleryDoc[] }) {
   const gridRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef(0);
   const [active, setActive] = useState<number | null>(null);
 
   const layout = useCallback(() => {
@@ -95,38 +96,42 @@ export default function GalleryClient({ items }: { items: GalleryDoc[] }) {
       .filter(Boolean).length;
     const allowWide = cols >= 4;
 
+    // One read pass, then one write pass, to avoid layout thrash.
     const tiles = Array.from(grid.querySelectorAll<HTMLElement>(".gtile"));
-    for (const t of tiles) {
+    const plan = tiles.map((t) => {
       const isWide = allowWide && t.classList.contains("wide");
-      t.style.gridColumn = isWide ? "span 2" : "";
       const w = t.getBoundingClientRect().width || 1;
       const r = parseFloat(t.dataset.ratio || "1.15");
-      const contentH = w * r;
-      const span = Math.max(1, Math.round((contentH + GAP) / (ROW + GAP)));
+      const span = Math.max(1, Math.round((w * r + GAP) / (ROW + GAP)));
+      return { t, isWide, span };
+    });
+    for (const { t, isWide, span } of plan) {
+      t.style.gridColumn = isWide ? "span 2" : "";
       t.style.gridRowEnd = `span ${span}`;
     }
   }, []);
 
+  // Coalesce many layout requests (one per image load) into one per frame.
+  const scheduleLayout = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(layout);
+  }, [layout]);
+
   useEffect(() => {
-    layout();
-    const ro = new ResizeObserver(() => layout());
+    scheduleLayout();
+    const ro = new ResizeObserver(scheduleLayout);
     if (gridRef.current) ro.observe(gridRef.current);
-    let raf = 0;
-    const onResize = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(layout);
-    };
-    window.addEventListener("resize", onResize);
-    const t1 = setTimeout(layout, 250);
-    const t2 = setTimeout(layout, 900);
+    window.addEventListener("resize", scheduleLayout);
+    const t1 = setTimeout(scheduleLayout, 300);
+    const t2 = setTimeout(scheduleLayout, 1200);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", scheduleLayout);
+      cancelAnimationFrame(rafRef.current);
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [layout, items]);
+  }, [scheduleLayout, items]);
 
   const close = useCallback(() => setActive(null), []);
   const step = useCallback(
@@ -161,7 +166,7 @@ export default function GalleryClient({ items }: { items: GalleryDoc[] }) {
             g={g}
             index={i}
             onOpen={() => setActive(i)}
-            onMeasure={layout}
+            onMeasure={scheduleLayout}
           />
         ))}
       </div>

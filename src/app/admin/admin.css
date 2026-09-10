@@ -5,7 +5,7 @@
   padding:26px 18px;display:flex;flex-direction:column;gap:6px}
 .admin-side .brand{display:flex;align-items:center;gap:11px;margin-bottom:24px;padding:0 8px}
 .admin-side .brand .logo-mark{width:34px;height:34px}
-.admin-side .brand b{font-family:"Newsreader",serif;font-weight:500;font-size:17px;color:var(--on-panel)}
+.admin-side .brand b{font-family:var(--font-newsreader),Georgia,serif;font-weight:500;font-size:17px;color:var(--on-panel)}
 .admin-nav a{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;font-size:14.5px;
   font-weight:500;color:var(--on-panel-soft);cursor:pointer;transition:.15s}
 .admin-nav a:hover{background:rgba(243,236,221,.08);color:var(--on-panel)}
@@ -16,14 +16,14 @@
 .admin-main{padding:40px clamp(22px,4vw,52px)}
 
 .a-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
-.a-head h1{font-family:"Newsreader",serif;font-weight:400;font-size:34px;letter-spacing:-.02em;margin:0}
+.a-head h1{font-family:var(--font-newsreader),Georgia,serif;font-weight:400;font-size:34px;letter-spacing:-.02em;margin:0}
 .a-head p{color:var(--ink-soft);margin:8px 0 0;font-size:15px}
 
 .a-grid{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:24px;align-items:start}
 @media(max-width:920px){.a-grid{grid-template-columns:1fr}}
 .a-card{background:var(--surface);border:1px solid var(--hair);border-radius:18px;padding:24px;
   box-shadow:0 20px 50px -50px rgba(31,24,16,.5)}
-.a-card h3{font-family:"Newsreader",serif;font-weight:500;font-size:19px;margin:0 0 18px}
+.a-card h3{font-family:var(--font-newsreader),Georgia,serif;font-weight:500;font-size:19px;margin:0 0 18px}
 
 .a-field{margin-bottom:16px}
 .a-field label{display:block;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:var(--ink-soft);margin-bottom:7px}
@@ -71,7 +71,7 @@
 .a-gate-card{max-width:440px;width:100%;background:var(--surface);border:1px solid var(--hair);border-radius:22px;
   padding:40px;text-align:center;box-shadow:0 40px 90px -60px rgba(31,24,16,.6)}
 .a-gate-card .logo-mark{width:56px;height:56px;margin:0 auto 20px}
-.a-gate-card h1{font-family:"Newsreader",serif;font-weight:400;font-size:28px;margin:0 0 8px}
+.a-gate-card h1{font-family:var(--font-newsreader),Georgia,serif;font-weight:400;font-size:28px;margin:0 0 8px}
 .a-gate-card p{color:var(--ink-soft);font-size:15px;margin:0 0 24px;line-height:1.55}
 .a-gate-card .a-btn.primary{width:100%;padding:14px}
 .a-note{margin-top:18px;font-size:13px;color:var(--faint);line-height:1.5}
@@ -88,7 +88,7 @@
 .inbox-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .inbox-item .from{font-weight:600}
 .inbox-item .email{font-size:13px;color:var(--faint)}
-.inbox-item .subj{font-family:"Newsreader",serif;font-size:18px;margin:10px 0 6px}
+.inbox-item .subj{font-family:var(--font-newsreader),Georgia,serif;font-size:18px;margin:10px 0 6px}
 .inbox-item .body{color:var(--ink-soft);font-size:15px;line-height:1.6;white-space:pre-line}
 .inbox-item .actions{display:flex;gap:8px;margin-top:14px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rust);margin-right:7px}

@@ -5,7 +5,14 @@
 interface R2Object {
   body: ReadableStream | null;
   httpEtag: string;
+  size: number;
   writeHttpMetadata(headers: Headers): void;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+// Cloudflare adds a `default` cache to the standard CacheStorage.
+interface CacheStorage {
+  default: Cache;
 }
 
 interface R2Bucket {
