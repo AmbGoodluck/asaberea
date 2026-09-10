@@ -9,7 +9,8 @@
     "binding": "ASSETS"
   },
   "r2_buckets": [
-    { "binding": "MEDIA", "bucket_name": "asaberea-media" }
+    { "binding": "MEDIA", "bucket_name": "asaberea-media" },
+    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "asaberea-cache" }
   ],
   "observability": {
     "enabled": true

@@ -34,6 +34,22 @@ So this project talks to Google directly:
 `firebase-admin` stays in `package.json` only for the Node scripts
 (`set-admins`, `import-gallery`), which never run on the Worker.
 
+## Page cache (fixes Error 1102)
+
+Prerendered / ISR pages are cached in R2 (**`asaberea-cache`**, binding
+`NEXT_INC_CACHE_R2_BUCKET`) with a per-region Cache-API layer, and
+`enableCacheInterception` serves them straight from the fetch handler without
+running the full Next.js renderer. This keeps CPU well under the Workers limit,
+so pages stop intermittently returning Cloudflare **Error 1102** ("Worker
+exceeded resource limits").
+
+`npm run cf:deploy` repopulates the cache automatically ("Successfully populated
+cache with N entries"). To recreate the bucket:
+`npx wrangler r2 bucket create asaberea-cache`.
+
+If 1102 still shows up under heavy traffic, upgrade the account to **Workers
+Paid** ($5/mo) for a 30s CPU limit instead of the free 10ms.
+
 ## Images: R2 bucket
 
 Images are stored in the R2 bucket **`asaberea-media`**, bound to the Worker as
