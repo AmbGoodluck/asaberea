@@ -37,7 +37,7 @@ export default function ContactPage() {
                   <span className="cs-handle">@asa.berea</span>
                 </a>
                 <div className="cs-row"><span>Campus</span><span className="cs-handle">Berea College, Kentucky</span></div>
-                <div className="cs-row"><span>Membership</span><span className="cs-handle">$5 per semester</span></div>
+                <div className="cs-row"><span>Membership</span><span className="cs-handle">$6 per semester</span></div>
               </div>
             </div>
           </aside>

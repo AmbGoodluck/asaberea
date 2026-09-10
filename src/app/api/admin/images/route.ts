@@ -1,4 +1,4 @@
-import { requireAdmin, json } from "@/lib/auth-guard";
+import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
 import { adminDb } from "@/lib/firebase/admin";
 import { imageSlotInput, COL } from "@/lib/firebase/schema";
 
@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 
 // GET all image slots
 export async function GET(req: Request) {
+  const limited = guardRate(req, "admin-read", 120, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();
@@ -22,6 +24,8 @@ export async function GET(req: Request) {
 
 // PUT upsert a slot { slot, url }
 export async function PUT(req: Request) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { SIGNUP_URL } from "@/lib/links";
 
 const links = [
   { href: "/", label: "Home" },
@@ -46,9 +47,9 @@ export default function Nav() {
               </Link>
             ))}
           </div>
-          <Link href="/about" className="btn solid nav-cta">
+          <a href={SIGNUP_URL} target="_blank" rel="noreferrer" className="btn solid nav-cta">
             Join ASA
-          </Link>
+          </a>
           <button className="burger" aria-label="Menu" onClick={() => setOpen(true)}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M4 7h16M4 12h16M4 17h16" />

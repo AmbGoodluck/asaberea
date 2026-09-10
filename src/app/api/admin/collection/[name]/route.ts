@@ -1,4 +1,4 @@
-import { requireAdmin, json } from "@/lib/auth-guard";
+import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
 import { adminDb } from "@/lib/firebase/admin";
 import { getResource } from "@/lib/resources";
 import { sanitizeObject } from "@/lib/sanitize";
@@ -9,6 +9,8 @@ export const dynamic = "force-dynamic";
 
 // GET  /api/admin/collection/:name  -> list all docs (admin only)
 export async function GET(req: Request, { params }: { params: { name: string } }) {
+  const limited = guardRate(req, "admin-read", 120, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();
@@ -25,6 +27,8 @@ export async function GET(req: Request, { params }: { params: { name: string } }
 
 // POST /api/admin/collection/:name  -> create a doc (admin only)
 export async function POST(req: Request, { params }: { params: { name: string } }) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();

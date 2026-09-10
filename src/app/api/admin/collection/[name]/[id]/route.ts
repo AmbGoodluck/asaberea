@@ -1,4 +1,4 @@
-import { requireAdmin, json } from "@/lib/auth-guard";
+import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
 import { adminDb } from "@/lib/firebase/admin";
 import { getResource } from "@/lib/resources";
 import { sanitizeObject } from "@/lib/sanitize";
@@ -15,6 +15,8 @@ function safeId(id: string) {
 
 // PUT /api/admin/collection/:name/:id  -> replace fields (admin only)
 export async function PUT(req: Request, { params }: Ctx) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();
@@ -39,6 +41,8 @@ export async function PUT(req: Request, { params }: Ctx) {
 
 // PATCH /api/admin/collection/contacts/:id  -> mark read/unread
 export async function PATCH(req: Request, { params }: Ctx) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();
@@ -56,6 +60,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
 
 // DELETE /api/admin/collection/:name/:id
 export async function DELETE(req: Request, { params }: Ctx) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();

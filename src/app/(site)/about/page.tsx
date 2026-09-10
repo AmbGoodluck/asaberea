@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { pillars } from "@/lib/data";
+import { SIGNUP_URL } from "@/lib/links";
 
 export const metadata: Metadata = { title: "About · ASA Berea" };
 
@@ -26,7 +27,7 @@ export default function AboutPage() {
             “We believe in creating an atmosphere where students convene socially and academically to
             grow together as <span className="em">young men and women of value</span> to our societies.”
           </div>
-          <div className="lbl reveal" style={{ marginTop: 26 }}>,  The ASA Constitution, Preamble</div>
+          <div className="lbl reveal" style={{ marginTop: 26 }}>From the ASA Constitution, Preamble</div>
         </div>
       </section>
 
@@ -121,12 +122,13 @@ export default function AboutPage() {
                 Three simple steps.
               </h2>
               <div className="mrow">
-                <div className="mstep"><div className="num">01</div><h4>Pay your dues</h4><p>Just $5 per semester. Donations above that are always welcome and support our events.</p></div>
+                <div className="mstep"><div className="num">01</div><h4>Pay your dues</h4><p>Just $6 per semester. Donations above that are always welcome and support our events.</p></div>
                 <div className="mstep"><div className="num">02</div><h4>Show up</h4><p>Attend at least two ASA events a semester, the easiest part, we promise.</p></div>
                 <div className="mstep"><div className="num">03</div><h4>Take part</h4><p>Participate in the activities we sponsor, and help shape what ASA becomes.</p></div>
               </div>
-              <div style={{ marginTop: 36 }}>
-                <Link href="/events" className="btn light">Come to an event</Link>
+              <div style={{ marginTop: 36, display: "flex", gap: 14, flexWrap: "wrap" }}>
+                <a href={SIGNUP_URL} target="_blank" rel="noreferrer" className="btn light">Become a member</a>
+                <Link href="/events" className="btn ghost on-dark">Come to an event</Link>
               </div>
             </div>
           </div>

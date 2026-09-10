@@ -32,24 +32,6 @@ export const events: EventItem[] = [
   { date: "DEC 05", time: "7:30 PM", title: "Movie & Game Night", venue: "Union Lounge", category: "Social", c1: "#0C6B63", c2: "#08514B", desc: "Films, board games, and jollof to close the year.", status: "past" },
 ];
 
-export type Story = {
-  tag: "Culture" | "Opinion" | "Spotlight" | "Campus";
-  title: string;
-  excerpt: string;
-  read: string;
-  c1: string;
-  c2: string;
-};
-
-export const stories: Story[] = [
-  { tag: "Culture", title: "Finding home, one shared meal at a time", excerpt: "The night jollof turned strangers into family.", read: "6 min", c1: "#C2451F", c2: "#E39321" },
-  { tag: "Opinion", title: "Why representation on campus matters", excerpt: "A case for why ASA's voice belongs in every room.", read: "4 min", c1: "#0E7C6F", c2: "#0A5148" },
-  { tag: "Spotlight", title: "From Freetown to Berea: a first-year's diary", excerpt: "One member's first semester, in her own words.", read: "5 min", c1: "#5A1B48", c2: "#8A2C6B" },
-  { tag: "Campus", title: "How to survive (and love) your first winter", excerpt: "A very unofficial, very warm survival guide.", read: "3 min", c1: "#D89321", c2: "#B2401F" },
-  { tag: "Culture", title: "The music that carried us here", excerpt: "A playlist and the memories behind each track.", read: "4 min", c1: "#4A163B", c2: "#B23A20" },
-  { tag: "Spotlight", title: "Meet the cook behind the cook-off", excerpt: "The story of ASA's most contested trophy.", read: "5 min", c1: "#0A5148", c2: "#0E7C6F" },
-];
-
 export type Role = {
   role: string;
   duty: string;
@@ -80,8 +62,8 @@ export type Product = {
 };
 
 export const products: Product[] = [
-  { name: "ASA Classic Tee", price: "$18", sizes: "S – XXL", c1: "#C2451F", c2: "#E39321" },
-  { name: "Kente Hoodie", price: "$38", sizes: "S – XXL", c1: "#5A1B48", c2: "#8A2C6B" },
+  { name: "ASA Classic Tee", price: "$18", sizes: "S to XXL", c1: "#C2451F", c2: "#E39321" },
+  { name: "Kente Hoodie", price: "$38", sizes: "S to XXL", c1: "#5A1B48", c2: "#8A2C6B" },
   { name: "One Family Tote", price: "$14", sizes: "One size", c1: "#0E7C6F", c2: "#0A5148" },
   { name: "Continent Cap", price: "$20", sizes: "Adjustable", c1: "#D89321", c2: "#B2401F" },
   { name: "Sticker Pack", price: "$6", sizes: "Set of 6", c1: "#0A5148", c2: "#0E7C6F" },

@@ -1,5 +1,6 @@
 import "server-only";
 import { adminAuth, isAdminEmail } from "./firebase/admin";
+import { rateLimit, clientIp } from "./ratelimit";
 
 export type AdminUser = { uid: string; email: string };
 
@@ -28,4 +29,26 @@ export function json(data: unknown, status = 200) {
     status,
     headers: { "content-type": "application/json" },
   });
+}
+
+// Per-IP rate limit for an API route. Returns a 429 Response when the caller
+// is over the limit, or null to proceed. Default: 60 requests per minute.
+export function guardRate(
+  req: Request,
+  bucket: string,
+  limit = 60,
+  windowMs = 60_000
+): Response | null {
+  const res = rateLimit(`${bucket}:${clientIp(req)}`, limit, windowMs);
+  if (res.ok) return null;
+  return new Response(
+    JSON.stringify({ error: "rate_limited", retryAfter: res.retryAfter }),
+    {
+      status: 429,
+      headers: {
+        "content-type": "application/json",
+        "retry-after": String(res.retryAfter),
+      },
+    }
+  );
 }

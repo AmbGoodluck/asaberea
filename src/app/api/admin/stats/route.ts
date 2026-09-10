@@ -1,4 +1,4 @@
-import { requireAdmin, json } from "@/lib/auth-guard";
+import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
 import { adminDb } from "@/lib/firebase/admin";
 import { statsInput, COL, STATS_DOC } from "@/lib/firebase/schema";
 
@@ -6,15 +6,19 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const limited = guardRate(req, "admin-read", 120, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();
   if (!db) return json({ error: "not_configured" }, 503);
   const doc = await db.collection(COL.stats).doc(STATS_DOC).get();
-  return json(doc.exists ? doc.data() : { nations: 9, eventsPerYear: 24, ecLeaders: 10, joinPrice: 5 });
+  return json(doc.exists ? doc.data() : { nations: 9, eventsPerYear: 24, ecLeaders: 10, joinPrice: 6 });
 }
 
 export async function PUT(req: Request) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
   const db = adminDb();

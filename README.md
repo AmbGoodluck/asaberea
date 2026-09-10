@@ -36,11 +36,12 @@ Sign in with an authorized Google account. Tabs:
    npm run dev                  # http://localhost:3000
    ```
 
-2. **Firebase keys.** In the Firebase console:
+2. **Firebase keys.** Follow [`FIREBASE_SETUP.md`](./FIREBASE_SETUP.md) for the
+   full walkthrough (which console screen, which file, which variable). In short:
    - Project settings → General → Your apps → copy the web config into the
-     `NEXT_PUBLIC_FIREBASE_*` values.
-   - Project settings → Service accounts → Generate new private key → paste the
-     JSON into `FIREBASE_SERVICE_ACCOUNT` (one line, or base64).
+     `NEXT_PUBLIC_FIREBASE_*` values in `.env.local`.
+   - Project settings → Service accounts → Generate new private key → base64 the
+     JSON into `FIREBASE_SERVICE_ACCOUNT` (server-only).
    - Authentication → Sign-in method → enable **Google**.
    - Put admin emails in `ADMIN_EMAILS` (comma-separated).
 
@@ -64,6 +65,12 @@ Sign in with an authorized Google account. Tabs:
   token and the admin allowlist; direct client writes are denied by the rules.
 - The contact endpoint is rate limited (5 requests / 10 min per IP), sanitizes
   and validates every field (zod), and includes a honeypot for bots.
+- Every admin API route is rate limited per IP (writes 40/min, reads 120/min)
+  on top of the token + allowlist check.
+- Security headers are set for every response in `next.config.mjs`:
+  Content-Security-Policy (scoped to Next, Google Fonts, and Firebase),
+  HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy`, and a locked-down `Permissions-Policy`.
 - The contact inbox is never client-readable; it is server-only.
 - Storage uploads are limited to admins, image types only, under 6 MB.
 - No secrets are committed. Only `NEXT_PUBLIC_*` values reach the browser.

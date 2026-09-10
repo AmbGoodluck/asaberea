@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SIGNUP_URL, INSTAGRAM_URL } from "@/lib/links";
 
 export default function Footer() {
   return (
@@ -36,8 +37,8 @@ export default function Footer() {
           <div className="f-col">
             <div className="lbl">Connect</div>
             <div className="links">
-              <a href="https://instagram.com/asa.berea" target="_blank" rel="noreferrer">Instagram</a>
-              <Link href="/about">Join ASA</Link>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">Instagram</a>
+              <a href={SIGNUP_URL} target="_blank" rel="noreferrer">Join ASA</a>
               <Link href="/contact">Contact the EC</Link>
             </div>
           </div>

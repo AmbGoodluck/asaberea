@@ -81,6 +81,7 @@ export type ContactDoc = {
 
 // Named image slots the admin can replace per page.
 export const IMAGE_SLOTS = [
+  { id: "home-hero", label: "Home page hero image (optional backdrop)" },
   { id: "about-hero", label: "About page hero" },
   { id: "about-story", label: "About story image" },
   { id: "spotlight-feature", label: "Home spotlight feature" },

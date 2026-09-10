@@ -3,12 +3,19 @@ import EventReel from "@/components/EventReel";
 import AfricaHero from "@/components/AfricaHero";
 import { EventCard, pairFor } from "@/components/cards";
 import { pillars, grad } from "@/lib/data";
-import { getEvents, getStats, getSpotlights } from "@/lib/content";
+import { getEvents, getStats, getSpotlights, getImageSlots } from "@/lib/content";
+import { SIGNUP_URL } from "@/lib/links";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [events, stats, spotlights] = await Promise.all([getEvents(), getStats(), getSpotlights()]);
+  const [events, stats, spotlights, images] = await Promise.all([
+    getEvents(),
+    getStats(),
+    getSpotlights(),
+    getImageSlots(),
+  ]);
+  const heroImage = images["home-hero"] || "";
   const upcoming = events.filter((e) => !e.isPast).slice(0, 3);
   const reelEvents = events.slice(0, 10);
 
@@ -16,6 +23,13 @@ export default async function HomePage() {
     <>
       <header className="hero">
         <div className="glow" />
+        {heroImage && (
+          <div
+            className="hero-backdrop"
+            style={{ backgroundImage: `url(${heroImage})` }}
+            aria-hidden
+          />
+        )}
         <AfricaHero />
         <div className="wrap">
           <div className="hero-copy">
@@ -32,7 +46,7 @@ export default async function HomePage() {
               culture, its ideas, and its people. Come find your people.
             </p>
             <div className="hero-cta">
-              <Link href="/about" className="btn solid">Become a member</Link>
+              <a href={SIGNUP_URL} target="_blank" rel="noreferrer" className="btn solid">Become a member</a>
               <Link href="/events" className="btn ghost">See what&apos;s happening</Link>
             </div>
             <div className="kente-line" />
@@ -150,7 +164,7 @@ export default async function HomePage() {
                 Belong for life.
               </h2>
               <p>Dues, two events a semester, and a whole community waiting to meet you. That&apos;s all it takes.</p>
-              <Link href="/about" className="btn light">Become a member</Link>
+              <a href={SIGNUP_URL} target="_blank" rel="noreferrer" className="btn light">Become a member</a>
             </div>
           </div>
         </div>
