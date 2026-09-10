@@ -75,10 +75,10 @@ export default async function HomePage() {
 
       <section className="stats">
         <div className="wrap stat-grid">
-          <div className="stat reveal s1"><div className="n" data-count={stats.nations}>0</div><div className="k">Nations on campus</div></div>
-          <div className="stat reveal s2"><div className="n" data-count={stats.eventsPerYear} data-suffix="+">0</div><div className="k">Events a year</div></div>
-          <div className="stat reveal s3"><div className="n" data-count={stats.ecLeaders}>0</div><div className="k">EC leaders</div></div>
-          <div className="stat reveal s4"><div className="n" data-prefix="$" data-count={stats.joinPrice}>0</div><div className="k">To join</div></div>
+          <div className="stat reveal s1"><div className="n" data-count={stats.nations}>{stats.nations}</div><div className="k">Nations on campus</div></div>
+          <div className="stat reveal s2"><div className="n" data-count={stats.eventsPerYear}>{stats.eventsPerYear}</div><div className="k">Events a year</div></div>
+          <div className="stat reveal s3"><div className="n" data-count={stats.ecLeaders}>{stats.ecLeaders}</div><div className="k">EC leaders</div></div>
+          <div className="stat reveal s4"><div className="n" data-prefix="$" data-count={stats.joinPrice}>${stats.joinPrice}</div><div className="k">To join</div></div>
         </div>
       </section>
 

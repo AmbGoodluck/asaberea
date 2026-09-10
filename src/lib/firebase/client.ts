@@ -1,10 +1,9 @@
 // Firebase client SDK (browser). Uses only public NEXT_PUBLIC_* keys.
-// Note: no firebase/firestore import here. The admin portal talks to the
-// server API routes, not Firestore directly, and firebase/firestore pulls in
-// protobuf.js, which cannot run on Cloudflare Workers during SSR.
+// Only Auth is used: content goes through the server API routes, and images
+// go to the Cloudflare R2 bucket via /api/admin/upload. (firebase/firestore
+// and firebase/storage both pull in protobuf.js, which breaks SSR on Workers.)
 import { getApps, getApp, initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const config = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,9 +27,5 @@ function getClientApp(): FirebaseApp | null {
 export function clientAuth(): Auth | null {
   const a = getClientApp();
   return a ? getAuth(a) : null;
-}
-export function clientStorage(): FirebaseStorage | null {
-  const a = getClientApp();
-  return a ? getStorage(a) : null;
 }
 export const googleProvider = new GoogleAuthProvider();

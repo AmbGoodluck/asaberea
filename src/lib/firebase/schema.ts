@@ -63,11 +63,12 @@ export type GalleryDoc = {
   ratio?: number;
 };
 
+// Free-text so values like "24+", "over 25", or "9" all work.
 export type StatsDoc = {
-  nations: number;
-  eventsPerYear: number;
-  ecLeaders: number;
-  joinPrice: number;
+  nations: string;
+  eventsPerYear: string;
+  ecLeaders: string;
+  joinPrice: string;
 };
 
 export type ContactDoc = {
@@ -133,11 +134,12 @@ export const galleryInput = z.object({
   order: z.number().int().min(0).max(9999).default(0),
 });
 
+const statLine = z.string().trim().min(1).max(40);
 export const statsInput = z.object({
-  nations: z.number().int().min(0).max(100000),
-  eventsPerYear: z.number().int().min(0).max(100000),
-  ecLeaders: z.number().int().min(0).max(100000),
-  joinPrice: z.number().int().min(0).max(100000),
+  nations: statLine,
+  eventsPerYear: statLine,
+  ecLeaders: statLine,
+  joinPrice: statLine,
 });
 
 export const imageSlotInput = z.object({

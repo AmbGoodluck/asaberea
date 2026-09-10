@@ -36,12 +36,11 @@ downloaded file is just a stopover.
 
 **Firestore Database**
 1. **Build > Firestore Database > Create database**.
-2. Start in **Production mode** (we ship real rules, see step 6).
+2. Start in **Production mode** (real rules are in step 6).
 3. Pick the region closest to campus, e.g. `us-east1`. This cannot be changed later.
 
-**Storage**
-1. **Build > Storage > Get started**.
-2. Accept the default bucket. Production mode is fine, rules come in step 6.
+**Storage** — not needed. Images live in a Cloudflare R2 bucket
+(`asaberea-media`), not Firebase Storage. See `CLOUDFLARE_DEPLOY.md`.
 
 ## 3. Get the web app config (the `NEXT_PUBLIC_*` keys)
 
@@ -121,13 +120,13 @@ Visit <http://localhost:3000/admin> and sign in with Google.
 
 ## 6. Deploy the security rules
 
-The repo already contains `firestore.rules` and `storage.rules`. Push them to Firebase:
+The repo contains `firestore.rules`. Push it to Firebase:
 
 ```bash
 npm i -g firebase-tools
 firebase login
 firebase use asa-berea            # your project id
-firebase deploy --only firestore:rules,storage
+firebase deploy --only firestore:rules
 ```
 
 What the rules enforce:
@@ -135,11 +134,10 @@ What the rules enforce:
   `images`, `stats`) are **read-only to the world, writable only by an admin**.
 - The `contacts` inbox has **no client access at all**; it is written and read
   only by the server.
-- Storage: uploads only by a signed-in admin, image MIME types only, under 6 MB.
 
 ## 7. Grant the `admin` custom claim
 
-The Storage/Firestore rules check `request.auth.token.admin == true`. Grant it:
+The Firestore rules (and future client reads) key off `request.auth.token.admin == true`. Grant it:
 
 1. Each admin listed in `ADMIN_EMAILS` signs in once at `/admin` (this creates
    their Firebase user record).
@@ -165,11 +163,11 @@ them. Then add the production domain under
 
 ## Quick checklist
 
-- [ ] Project created, Auth + Firestore + Storage enabled
+- [ ] Project created, Auth + Firestore enabled (Storage not needed, R2 is used)
 - [ ] Google sign-in provider enabled
 - [ ] `.env.local` created with 6 `NEXT_PUBLIC_FIREBASE_*` values
 - [ ] `FIREBASE_SERVICE_ACCOUNT` set (base64 of the downloaded JSON)
 - [ ] `ADMIN_EMAILS` set
-- [ ] `firebase deploy --only firestore:rules,storage` run
+- [ ] `firebase deploy --only firestore:rules` run
 - [ ] Each admin signed in once, then `npm run set-admins` run
 - [ ] Same vars added to the production host

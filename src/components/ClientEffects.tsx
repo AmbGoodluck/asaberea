@@ -46,18 +46,26 @@ export default function ClientEffects() {
     // count-up numbers
     const counters = Array.from(document.querySelectorAll<HTMLElement>("[data-count]"));
     const run = (el: HTMLElement) => {
-      const target = parseFloat(el.getAttribute("data-count") || "0");
+      const raw = (el.getAttribute("data-count") || "").trim();
       const pre = el.getAttribute("data-prefix") || "";
-      const suf = el.getAttribute("data-suffix") || "";
+      // Split "24+" -> ["24", "+"], "over 25" -> no leading number.
+      const m = raw.match(/^(\d[\d,]*)(.*)$/);
+      if (!m) {
+        el.textContent = raw ? pre + raw : el.textContent;
+        return;
+      }
+      const target = parseInt(m[1].replace(/,/g, ""), 10);
+      const rest = m[2];
       if (reduce) {
-        el.textContent = pre + target + suf;
+        el.textContent = pre + target + rest;
         return;
       }
       let start: number | null = null;
       const step = (ts: number) => {
         if (start === null) start = ts;
         const p = Math.min((ts - start) / 1300, 1);
-        el.textContent = pre + Math.round((1 - Math.pow(1 - p, 3)) * target) + suf;
+        el.textContent =
+          pre + Math.round((1 - Math.pow(1 - p, 3)) * target) + rest;
         if (p < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);

@@ -1,9 +1,9 @@
 # ASA Berea
 
 Website and admin portal for the **African Students Association (ASA)** at
-Berea College. Built with **Next.js 14 (App Router)** and **TypeScript**, with
-**Firebase** (Auth, Firestore, Storage) powering a no-code admin portal at
-`/admin`.
+Berea College. Built with **Next.js 15 (App Router)** and **TypeScript**, with
+**Firebase** (Auth + Firestore) powering a no-code admin portal at `/admin`.
+Images live in a **Cloudflare R2** bucket, served from `/media/<key>`.
 
 The public site works on seed content out of the box. Add your Firebase keys
 and it becomes fully live and admin-managed, with no code changes to the pages.
@@ -26,7 +26,8 @@ Sign in with an authorized Google account. Tabs:
 
 - **Events** name, description, flyer, date, time, venue, link, and an
   upcoming/past toggle. Past events move to the archive automatically.
-- **Stats** the four homepage numbers (nations, events a year, EC leaders, dues).
+- **Stats** the four homepage figures (nations, events a year, EC leaders, dues).
+  Free text, so "24+" or "over 25" work, not just plain numbers.
 - **Spotlight** feature students and accomplishments (shown on the homepage).
 - **Leadership** the Executive Committee roster (name, position, major, photo).
 - **Images** swap the hero and page images, and manage the photo gallery.
@@ -62,7 +63,7 @@ Sign in with an authorized Google account. Tabs:
 4. **Deploy the security rules** (needs the Firebase CLI, `npm i -g firebase-tools`):
 
    ```bash
-   firebase deploy --only firestore:rules,storage
+   firebase deploy --only firestore:rules
    ```
 
 ## Security
@@ -80,7 +81,8 @@ Sign in with an authorized Google account. Tabs:
   HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
   `Referrer-Policy`, and a locked-down `Permissions-Policy`.
 - The contact inbox is never client-readable; it is server-only.
-- Storage uploads are limited to admins, image types only, under 6 MB.
+- Image uploads go through `/api/admin/upload` (admin only, image types, under
+  8 MB) into the R2 bucket; `/media/<key>` serves them read-only.
 - No secrets are committed. Only `NEXT_PUBLIC_*` values reach the browser.
 
 ## Project structure
@@ -94,11 +96,11 @@ src/
     globals.css        design system
   components/          Nav, Footer, hero, cards, admin UI
   lib/
-    firebase/          client + admin SDK, schema + zod
+    firebase/          client SDK + schema/zod; firestore-rest.ts (Admin over REST)
     content.ts         reads Firestore, falls back to seed data
     data.ts            seed content
     sanitize.ts, ratelimit.ts, auth-guard.ts
-firestore.rules, storage.rules, firebase.json
+firestore.rules, firebase.json
 open-next.config.ts, wrangler.jsonc          Cloudflare Workers deploy
 scripts/
   set-admin-claims.mjs      grant the admin custom claim
@@ -118,9 +120,9 @@ npm run import-gallery -- --box https://berea.box.com/v/eventsphotos
 npm run import-gallery -- ~/Downloads/eventsphotos --dry
 ```
 
-Each image is uploaded to Storage and added to the `gallery` collection, so it
-appears on `/gallery` and the homepage strip. Re-running skips photos already
-imported.
+Each image is uploaded to the R2 bucket (via `wrangler`, so it uses your
+`wrangler login`) and added to the `gallery` collection, so it appears on
+`/gallery` and the homepage strip. Re-running skips photos already imported.
 
 ## Design
 

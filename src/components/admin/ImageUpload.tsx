@@ -1,10 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { clientStorage } from "@/lib/firebase/client";
+import { useAdmin } from "./AdminProvider";
 
-const MAX_BYTES = 6 * 1024 * 1024; // 6 MB
+const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 
 export default function ImageUpload({
@@ -18,6 +17,7 @@ export default function ImageUpload({
   folder?: string;
   label?: string;
 }) {
+  const { authedFetch } = useAdmin();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -29,23 +29,24 @@ export default function ImageUpload({
       return;
     }
     if (file.size > MAX_BYTES) {
-      setErr("Image must be under 6 MB.");
-      return;
-    }
-    const storage = clientStorage();
-    if (!storage) {
-      setErr("Storage is not configured yet.");
+      setErr("Image must be under 8 MB.");
       return;
     }
     setBusy(true);
     try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-60);
-      const path = `${folder}/${Date.now()}_${safeName}`;
-      const snap = await uploadBytes(ref(storage, path), file, { contentType: file.type });
-      const url = await getDownloadURL(snap.ref);
-      onChange(url);
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", folder);
+      const res = await authedFetch("/api/admin/upload", { method: "POST", body: fd });
+      if (!res.ok) {
+        setErr("Upload failed. Check your admin access and try again.");
+        return;
+      }
+      const data = (await res.json()) as { url?: string };
+      if (data.url) onChange(data.url);
+      else setErr("Upload failed. Try again.");
     } catch {
-      setErr("Upload failed. Check your admin access and try again.");
+      setErr("Upload failed. Check your connection and try again.");
     } finally {
       setBusy(false);
     }

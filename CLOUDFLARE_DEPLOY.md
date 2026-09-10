@@ -34,6 +34,19 @@ So this project talks to Google directly:
 `firebase-admin` stays in `package.json` only for the Node scripts
 (`set-admins`, `import-gallery`), which never run on the Worker.
 
+## Images: R2 bucket
+
+Images are stored in the R2 bucket **`asaberea-media`**, bound to the Worker as
+`MEDIA` (`wrangler.jsonc`).
+
+- Upload: `POST /api/admin/upload` (admin only) `env.MEDIA.put(...)`
+- Serve: `GET /media/<key>` streams the object, same-origin, long cache
+- Bulk import: `npm run import-gallery` shells out to
+  `wrangler r2 object put asaberea-media/<key> --remote`, so it uses your
+  `wrangler login` (no extra credentials)
+
+To recreate the bucket on another account: `npx wrangler r2 bucket create asaberea-media`.
+
 ## Secrets (already set on the Worker)
 
 ```

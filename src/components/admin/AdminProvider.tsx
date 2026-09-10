@@ -78,7 +78,10 @@ export default function AdminProvider({ children }: { children: React.ReactNode 
       const token = u ? await u.getIdToken() : "";
       const headers = new Headers(init.headers);
       headers.set("authorization", "Bearer " + token);
-      if (init.body && !headers.has("content-type")) headers.set("content-type", "application/json");
+      // Let the browser set the multipart boundary for FormData bodies.
+      if (init.body && !(init.body instanceof FormData) && !headers.has("content-type")) {
+        headers.set("content-type", "application/json");
+      }
       return fetch(path, { ...init, headers });
     },
     []

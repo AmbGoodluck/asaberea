@@ -33,7 +33,7 @@ export async function getStats(): Promise<StatsDoc> {
       if (doc) return doc as unknown as StatsDoc;
     } catch {}
   }
-  return { nations: 9, eventsPerYear: 24, ecLeaders: 10, joinPrice: 6 };
+  return { nations: "9", eventsPerYear: "24+", ecLeaders: "16", joinPrice: "6" };
 }
 
 export async function getEvents(): Promise<EventDoc[]> {

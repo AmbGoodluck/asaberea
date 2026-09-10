@@ -3,17 +3,17 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin/AdminProvider";
 
-type Stats = { nations: number; eventsPerYear: number; ecLeaders: number; joinPrice: number };
-const FIELDS: { key: keyof Stats; label: string }[] = [
-  { key: "nations", label: "Nations on campus" },
-  { key: "eventsPerYear", label: "Events a year" },
-  { key: "ecLeaders", label: "EC leaders" },
-  { key: "joinPrice", label: "To join ($)" },
+type Stats = { nations: string; eventsPerYear: string; ecLeaders: string; joinPrice: string };
+const FIELDS: { key: keyof Stats; label: string; hint: string }[] = [
+  { key: "nations", label: "Nations on campus", hint: "e.g. 9" },
+  { key: "eventsPerYear", label: "Events a year", hint: "e.g. 24+" },
+  { key: "ecLeaders", label: "EC leaders", hint: "e.g. 16" },
+  { key: "joinPrice", label: "To join ($ shown automatically)", hint: "e.g. 6" },
 ];
 
 export default function StatsAdmin() {
   const { authedFetch } = useAdmin();
-  const [stats, setStats] = useState<Stats>({ nations: 0, eventsPerYear: 0, ecLeaders: 0, joinPrice: 0 });
+  const [stats, setStats] = useState<Stats>({ nations: "", eventsPerYear: "", ecLeaders: "", joinPrice: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function StatsAdmin() {
       <div className="a-head">
         <div>
           <h1>Stats</h1>
-          <p>The four numbers on the homepage. Change them any time.</p>
+          <p>The four figures on the homepage. Text is fine, so &quot;24+&quot; or &quot;over 25&quot; both work.</p>
         </div>
       </div>
       <div className="a-card" style={{ maxWidth: 560 }}>
@@ -58,9 +58,11 @@ export default function StatsAdmin() {
                 <div className="a-field" key={f.key}>
                   <label>{f.label}</label>
                   <input
-                    type="number"
+                    type="text"
+                    maxLength={40}
+                    placeholder={f.hint}
                     value={stats[f.key]}
-                    onChange={(e) => setStats((s) => ({ ...s, [f.key]: Number(e.target.value) }))}
+                    onChange={(e) => setStats((s) => ({ ...s, [f.key]: e.target.value }))}
                   />
                 </div>
               ))}
