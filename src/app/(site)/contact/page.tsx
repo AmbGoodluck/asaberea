@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/links";
 
 export const metadata: Metadata = { title: "Contact · ASA Berea" };
 
@@ -32,9 +33,9 @@ export default function ContactPage() {
                 is open to all Berea students, faculty, and staff.
               </p>
               <div className="cs-links">
-                <a href="https://instagram.com/asa.berea" target="_blank" rel="noreferrer">
+                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
                   <span>Instagram</span>
-                  <span className="cs-handle">@asa.berea</span>
+                  <span className="cs-handle">{INSTAGRAM_HANDLE}</span>
                 </a>
                 <div className="cs-row"><span>Campus</span><span className="cs-handle">Berea College, Kentucky</span></div>
                 <div className="cs-row"><span>Membership</span><span className="cs-handle">$6 per semester</span></div>

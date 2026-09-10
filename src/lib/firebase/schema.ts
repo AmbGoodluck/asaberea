@@ -60,6 +60,7 @@ export type GalleryDoc = {
   createdAt: number;
   w?: number; // natural pixel width, when known (no layout shift)
   h?: number; // natural pixel height
+  blur?: string; // tiny blurred data URI for a smooth load
   c1?: string; // gradient fallback when no imageUrl
   c2?: string;
   ratio?: number;
@@ -136,6 +137,7 @@ export const galleryInput = z.object({
   order: z.number().int().min(0).max(9999).default(0),
   w: z.number().int().min(0).max(100000).optional(),
   h: z.number().int().min(0).max(100000).optional(),
+  blur: z.string().max(4000).optional(),
 });
 
 const statLine = z.string().trim().min(1).max(40);

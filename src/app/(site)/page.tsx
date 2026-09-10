@@ -4,7 +4,7 @@ import AfricaHero from "@/components/AfricaHero";
 import { EventCard, pairFor } from "@/components/cards";
 import { pillars, grad } from "@/lib/data";
 import { getEvents, getStats, getSpotlights, getImageSlots } from "@/lib/content";
-import { SIGNUP_URL } from "@/lib/links";
+import { SIGNUP_URL, INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/links";
 
 export const revalidate = 60;
 
@@ -61,7 +61,7 @@ export default async function HomePage() {
               <div className="lbl" style={{ color: "var(--rust)" }}>Always something happening</div>
               <h3 className="ny">A year in the life of ASA</h3>
             </div>
-            <a className="lbl" href="https://instagram.com/asa.berea" target="_blank" rel="noreferrer">@asa.berea →</a>
+            <a className="lbl" href={INSTAGRAM_URL} target="_blank" rel="noreferrer">{INSTAGRAM_HANDLE} →</a>
           </div>
           <EventReel events={reelEvents} />
           <div className="drag-hint">

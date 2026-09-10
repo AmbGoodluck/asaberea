@@ -43,6 +43,8 @@ export async function POST(req: Request) {
   const order = Number.isFinite(orderRaw) ? Math.max(0, Math.min(9999, orderRaw)) : 100;
   const w = Math.round(Number(form.get("w"))) || 0;
   const h = Math.round(Number(form.get("h"))) || 0;
+  const blurRaw = String(form.get("blur") || "");
+  const blur = blurRaw.startsWith("data:image/") && blurRaw.length <= 4000 ? blurRaw : "";
 
   const key = `gallery/${Date.now()}_${safeKeySegment(file.name || "photo")}`;
   await bucket.put(key, await file.arrayBuffer(), {
@@ -59,6 +61,7 @@ export async function POST(req: Request) {
     order,
     createdAt: Date.now(),
     ...(w && h ? { w, h } : {}),
+    ...(blur ? { blur } : {}),
   });
   if (!saved) return json({ error: "write_failed", url }, 502);
 

@@ -81,9 +81,11 @@ Sign in with an authorized Google account. Tabs:
   HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
   `Referrer-Policy`, and a locked-down `Permissions-Policy`.
 - The contact inbox is never client-readable; it is server-only.
-- Image uploads go through `/api/admin/upload` / `/api/admin/gallery` (admin
-  only, image types, under 20 MB) into the R2 bucket; `/media/<key>` serves
-  them read-only.
+- Images are compressed in the browser (downscaled, re-encoded to WebP) before
+  upload, then go through `/api/admin/upload` / `/api/admin/gallery` (admin only,
+  image types) into the R2 bucket; `/media/<key>` serves them read-only.
+- Gallery photos carry a tiny blur placeholder for a smooth load and can be
+  shared to an Instagram story as an ASA-framed card (client-side canvas).
 - No secrets are committed. Only `NEXT_PUBLIC_*` values reach the browser.
 
 ## Project structure

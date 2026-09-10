@@ -2,8 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useAdmin } from "./AdminProvider";
+import { compressImage } from "@/lib/image-compress";
 
-const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
+const MAX_BYTES = 25 * 1024 * 1024; // accepted before compression
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 
 export default function ImageUpload({
@@ -29,13 +30,14 @@ export default function ImageUpload({
       return;
     }
     if (file.size > MAX_BYTES) {
-      setErr("Image must be under 20 MB.");
+      setErr("Image must be under 25 MB.");
       return;
     }
     setBusy(true);
     try {
+      const { file: compressed } = await compressImage(file);
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", compressed);
       fd.append("folder", folder);
       const res = await authedFetch("/api/admin/upload", { method: "POST", body: fd });
       if (!res.ok) {

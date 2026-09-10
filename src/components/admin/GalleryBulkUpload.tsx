@@ -2,9 +2,10 @@
 
 import { useRef, useState } from "react";
 import { useAdmin } from "./AdminProvider";
+import { compressImage, runPool } from "@/lib/image-compress";
 
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
-const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
+const MAX_BYTES = 25 * 1024 * 1024; // 25 MB accepted (compressed well below on upload)
 
 function captionFromName(name: string): string {
   return name
@@ -13,23 +14,6 @@ function captionFromName(name: string): string {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 160);
-}
-
-// Natural pixel size, so the gallery can reserve space and avoid layout shift.
-function imageSize(file: File): Promise<{ w: number; h: number }> {
-  return new Promise((resolve) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      resolve({ w: img.naturalWidth, h: img.naturalHeight });
-      URL.revokeObjectURL(url);
-    };
-    img.onerror = () => {
-      resolve({ w: 0, h: 0 });
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  });
 }
 
 export default function GalleryBulkUpload({ onDone }: { onDone: () => void }) {
@@ -45,34 +29,37 @@ export default function GalleryBulkUpload({ onDone }: { onDone: () => void }) {
     const skipped = all.length - valid.length;
 
     if (valid.length === 0) {
-      setNotes(["No usable images. Use JPG, PNG, WebP, GIF, or AVIF, each under 20 MB."]);
+      setNotes(["No usable images. Use JPG, PNG, WebP, GIF, or AVIF, each under 25 MB."]);
       return;
     }
 
     setBusy(true);
     setNotes([]);
+    let done = 0;
     setProgress({ done: 0, total: valid.length });
     const failed: string[] = [];
 
-    for (let i = 0; i < valid.length; i++) {
-      const f = valid[i];
+    // Compress + upload up to 4 at a time.
+    await runPool(valid, 4, async (f, i) => {
       try {
-        const { w, h } = await imageSize(f);
+        const { file, w, h, blur } = await compressImage(f);
         const fd = new FormData();
-        fd.append("file", f);
+        fd.append("file", file);
         fd.append("caption", captionFromName(f.name));
         fd.append("order", String(200 + i));
         if (w && h) {
           fd.append("w", String(w));
           fd.append("h", String(h));
         }
+        if (blur) fd.append("blur", blur);
         const res = await authedFetch("/api/admin/gallery", { method: "POST", body: fd });
         if (!res.ok) failed.push(f.name);
       } catch {
         failed.push(f.name);
       }
-      setProgress({ done: i + 1, total: valid.length });
-    }
+      done += 1;
+      setProgress({ done, total: valid.length });
+    });
 
     setBusy(false);
     setProgress(null);
@@ -80,8 +67,11 @@ export default function GalleryBulkUpload({ onDone }: { onDone: () => void }) {
     const msgs: string[] = [];
     const ok = valid.length - failed.length;
     if (ok > 0) msgs.push(`Added ${ok} photo${ok === 1 ? "" : "s"}.`);
-    if (skipped > 0) msgs.push(`${skipped} skipped (wrong type or over 20 MB).`);
-    if (failed.length > 0) msgs.push(`${failed.length} failed: ${failed.slice(0, 6).join(", ")}${failed.length > 6 ? "..." : ""}`);
+    if (skipped > 0) msgs.push(`${skipped} skipped (wrong type or over 25 MB).`);
+    if (failed.length > 0)
+      msgs.push(
+        `${failed.length} failed: ${failed.slice(0, 6).join(", ")}${failed.length > 6 ? "..." : ""}`
+      );
     setNotes(msgs);
     onDone();
   }
@@ -90,8 +80,9 @@ export default function GalleryBulkUpload({ onDone }: { onDone: () => void }) {
     <div className="a-card" style={{ marginBottom: 26 }}>
       <h3>Add multiple gallery photos</h3>
       <p style={{ color: "var(--ink-soft)", fontSize: 14, margin: "0 0 14px", lineHeight: 1.55 }}>
-        Pick several images at once. Each becomes a gallery item; the caption
-        defaults to the file name and can be edited in the list below.
+        Pick several images at once. They are compressed in your browser before
+        upload, so even big phone photos go up fast. Captions default to the file
+        name and can be edited in the list below.
       </p>
       <div className="a-form-actions">
         <button
