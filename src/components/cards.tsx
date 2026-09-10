@@ -50,7 +50,7 @@ export function RoleCard({ r }: { r: LeaderDoc }) {
   return (
     <div className="ec reveal">
       {r.imageUrl ? (
-        <span className="av" style={{ backgroundImage: `url(${r.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+        <span className="av" style={{ backgroundImage: `url(${r.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center 20%" }} />
       ) : (
         <span className="av" style={{ background: grad(a, b) }}>{(r.name && r.name !== "Position open" ? r.name : r.position)[0]}</span>
       )}

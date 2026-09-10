@@ -66,15 +66,21 @@ export default async function EventDetailPage({
 
       <section className="sec">
         <div className="wrap event-body">
-          <div
-            className="event-hero-img"
-            style={
-              e.imageUrl
-                ? { backgroundImage: `url(${e.imageUrl})` }
-                : { background: grad(a, b) }
-            }
-          >
-            {!e.imageUrl && <div className="grain" style={{ opacity: 0.4 }} />}
+          <div className={"event-hero-img" + (e.imageUrl ? "" : " grad-only")}>
+            {e.imageUrl ? (
+              <>
+                <div
+                  className="ehi-blur"
+                  style={{ backgroundImage: `url(${e.imageUrl})` }}
+                  aria-hidden
+                />
+                <img className="ehi-photo" src={e.imageUrl} alt={e.title} />
+              </>
+            ) : (
+              <div className="ehi-grad" style={{ background: grad(a, b) }}>
+                <div className="grain" style={{ opacity: 0.4 }} />
+              </div>
+            )}
           </div>
 
           <div className="event-copy">

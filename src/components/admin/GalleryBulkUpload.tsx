@@ -15,6 +15,23 @@ function captionFromName(name: string): string {
     .slice(0, 160);
 }
 
+// Natural pixel size, so the gallery can reserve space and avoid layout shift.
+function imageSize(file: File): Promise<{ w: number; h: number }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      resolve({ w: img.naturalWidth, h: img.naturalHeight });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      resolve({ w: 0, h: 0 });
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
+
 export default function GalleryBulkUpload({ onDone }: { onDone: () => void }) {
   const { authedFetch } = useAdmin();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,10 +57,15 @@ export default function GalleryBulkUpload({ onDone }: { onDone: () => void }) {
     for (let i = 0; i < valid.length; i++) {
       const f = valid[i];
       try {
+        const { w, h } = await imageSize(f);
         const fd = new FormData();
         fd.append("file", f);
         fd.append("caption", captionFromName(f.name));
         fd.append("order", String(200 + i));
+        if (w && h) {
+          fd.append("w", String(w));
+          fd.append("h", String(h));
+        }
         const res = await authedFetch("/api/admin/gallery", { method: "POST", body: fd });
         if (!res.ok) failed.push(f.name);
       } catch {

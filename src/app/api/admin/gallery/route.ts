@@ -41,6 +41,8 @@ export async function POST(req: Request) {
   const caption = sanitizeText(form.get("caption"), 160);
   const orderRaw = Number(form.get("order"));
   const order = Number.isFinite(orderRaw) ? Math.max(0, Math.min(9999, orderRaw)) : 100;
+  const w = Math.round(Number(form.get("w"))) || 0;
+  const h = Math.round(Number(form.get("h"))) || 0;
 
   const key = `gallery/${Date.now()}_${safeKeySegment(file.name || "photo")}`;
   await bucket.put(key, await file.arrayBuffer(), {
@@ -56,6 +58,7 @@ export async function POST(req: Request) {
     imageUrl: url,
     order,
     createdAt: Date.now(),
+    ...(w && h ? { w, h } : {}),
   });
   if (!saved) return json({ error: "write_failed", url }, 502);
 
