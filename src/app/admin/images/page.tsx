@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin/AdminProvider";
 import ImageUpload from "@/components/admin/ImageUpload";
+import GalleryBulkUpload from "@/components/admin/GalleryBulkUpload";
 import EntityManager, { type Field } from "@/components/admin/EntityManager";
 import { IMAGE_SLOTS } from "@/lib/firebase/schema";
 
@@ -17,6 +18,7 @@ export default function ImagesAdmin() {
   const [slots, setSlots] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [savingSlot, setSavingSlot] = useState<string | null>(null);
+  const [galleryKey, setGalleryKey] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -71,10 +73,13 @@ export default function ImagesAdmin() {
         )}
       </div>
 
+      <GalleryBulkUpload onDone={() => setGalleryKey((k) => k + 1)} />
+
       <EntityManager
+        key={galleryKey}
         resource="gallery"
         title="Gallery photos"
-        subtitle="These appear in the gallery and the 'Always something happening' strip on the homepage."
+        subtitle="These appear in the gallery and the 'Always something happening' strip on the homepage. Use the box above to add many at once, or add one here with a custom caption."
         fields={galleryFields}
         primaryKey="caption"
       />

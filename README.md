@@ -81,8 +81,9 @@ Sign in with an authorized Google account. Tabs:
   HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
   `Referrer-Policy`, and a locked-down `Permissions-Policy`.
 - The contact inbox is never client-readable; it is server-only.
-- Image uploads go through `/api/admin/upload` (admin only, image types, under
-  8 MB) into the R2 bucket; `/media/<key>` serves them read-only.
+- Image uploads go through `/api/admin/upload` / `/api/admin/gallery` (admin
+  only, image types, under 20 MB) into the R2 bucket; `/media/<key>` serves
+  them read-only.
 - No secrets are committed. Only `NEXT_PUBLIC_*` values reach the browser.
 
 ## Project structure

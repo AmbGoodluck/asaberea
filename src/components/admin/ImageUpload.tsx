@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useAdmin } from "./AdminProvider";
 
-const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
+const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 
 export default function ImageUpload({
@@ -29,7 +29,7 @@ export default function ImageUpload({
       return;
     }
     if (file.size > MAX_BYTES) {
-      setErr("Image must be under 8 MB.");
+      setErr("Image must be under 20 MB.");
       return;
     }
     setBusy(true);

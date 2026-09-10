@@ -18,7 +18,7 @@ export function mediaUrl(key: string): string {
   return "/media/" + key.split("/").map(encodeURIComponent).join("/");
 }
 
-export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8 MB
+export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024; // 20 MB
 export const OK_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
