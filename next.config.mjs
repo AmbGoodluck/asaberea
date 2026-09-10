@@ -29,9 +29,16 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // This project is the tracing root even if a lockfile exists in a parent dir.
+  outputFileTracingRoot: import.meta.dirname,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
 };
 
 export default nextConfig;
+
+// Cloudflare (OpenNext) local-dev integration. No-op during a normal Node
+// build/deploy; lets `next dev` see Cloudflare bindings. See CLOUDFLARE_DEPLOY.md.
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

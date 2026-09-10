@@ -17,9 +17,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const e = await getEventBySlug(params.slug);
+  const { slug } = await params;
+  const e = await getEventBySlug(slug);
   if (!e) return { title: "Event not found · ASA Berea" };
   return {
     title: `${e.title} · ASA Berea`,
@@ -31,9 +32,10 @@ export async function generateMetadata({
 export default async function EventDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const e = await getEventBySlug(params.slug);
+  const { slug } = await params;
+  const e = await getEventBySlug(slug);
   if (!e) notFound();
 
   const all = await getEvents();

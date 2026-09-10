@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "asaberea",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Environment variables are NOT kept here. Set them in the Cloudflare
+  // dashboard (Workers > asaberea > Settings > Variables) or with:
+  //   wrangler secret put FIREBASE_SERVICE_ACCOUNT
+  //   wrangler secret put ADMIN_EMAILS
+  //   (NEXT_PUBLIC_* can be plain text vars)
+}

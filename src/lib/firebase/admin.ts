@@ -6,8 +6,11 @@ import {
   cert,
   type App,
 } from "firebase-admin/app";
-import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
+
+// Note: we deliberately do NOT import "firebase-admin/auth" here. ID tokens are
+// verified with `jose` in lib/verify-token.ts so the code runs on Cloudflare
+// Workers. firebase-admin is used only for Firestore (over the REST transport).
 
 function parseServiceAccount() {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -40,10 +43,6 @@ function getAdminApp(): App | null {
   return app;
 }
 
-export function adminAuth(): Auth | null {
-  const a = getAdminApp();
-  return a ? getAuth(a) : null;
-}
 let db: Firestore | null = null;
 export function adminDb(): Firestore | null {
   const a = getAdminApp();

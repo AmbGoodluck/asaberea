@@ -68,7 +68,9 @@ Sign in with an authorized Google account. Tabs:
 ## Security
 
 - All content writes go through server API routes that verify the Firebase ID
-  token and the admin allowlist; direct client writes are denied by the rules.
+  token (RS256, checked with `jose` against Google's public keys, so it runs on
+  any runtime) and the admin allowlist; direct client writes are denied by the
+  rules.
 - The contact endpoint is rate limited (5 requests / 10 min per IP), sanitizes
   and validates every field (zod), and includes a honeypot for bots.
 - Every admin API route is rate limited per IP (writes 40/min, reads 120/min)
@@ -97,8 +99,28 @@ src/
     data.ts            seed content
     sanitize.ts, ratelimit.ts, auth-guard.ts
 firestore.rules, storage.rules, firebase.json
-scripts/set-admin-claims.mjs
+open-next.config.ts, wrangler.jsonc          Cloudflare Workers deploy
+scripts/
+  set-admin-claims.mjs      grant the admin custom claim
+  import-gallery.mjs         bulk-import event photos into the gallery
 ```
+
+## Importing past-event photos
+
+```bash
+# from a folder on your computer (handles subfolders):
+npm run import-gallery -- ~/Downloads/eventsphotos
+
+# from a PUBLIC Box link (only if it needs no sign-in):
+npm run import-gallery -- --box https://berea.box.com/v/eventsphotos
+
+# preview without uploading:
+npm run import-gallery -- ~/Downloads/eventsphotos --dry
+```
+
+Each image is uploaded to Storage and added to the `gallery` collection, so it
+appears on `/gallery` and the homepage strip. Re-running skips photos already
+imported.
 
 ## Design
 

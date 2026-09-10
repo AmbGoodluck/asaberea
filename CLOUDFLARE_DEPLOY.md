@@ -1,73 +1,65 @@
 # Deploying to Cloudflare
 
-Short version: this app uses **server API routes with the Firebase Admin SDK**
-(`/api/admin/*`, `/api/contact`). That runs on a Node.js server. Cloudflare has
-two ways to host Next.js and they behave very differently here.
+This app is wired for **Cloudflare Workers via OpenNext**
+(`@opennextjs/cloudflare`). It runs Next.js with Node.js compatibility so the
+public site and the `/api` admin backend both work on Cloudflare.
 
-## The catch
+## What is already set up
 
-| Route | Needs |
-| --- | --- |
-| Public pages (`/`, `/events`, `/about`, ...) | anything, they are static / ISR |
-| `/api/admin/*`, `/api/contact` | Node.js runtime + `firebase-admin` |
+- `open-next.config.ts`, `wrangler.jsonc` (name `asaberea`, `nodejs_compat`)
+- `next.config.mjs` calls `initOpenNextCloudflareForDev()` for local dev
+- Firestore uses the **REST transport** (`preferRest`), required on Workers
+  (`src/lib/firebase/admin.ts`)
+- Firebase **ID tokens are verified with `jose`** (`src/lib/verify-token.ts`),
+  not the `firebase-admin/auth` module, which does not bundle for Workers
+- Scripts in `package.json`:
+  - `npm run cf:build` build the Worker into `.open-next/`
+  - `npm run cf:preview` build + run it locally on `workerd`
+  - `npm run cf:deploy` build + deploy
+  - `npm run cf:typegen` regenerate `cloudflare-env.d.ts`
 
-`firebase-admin` does **not** run on Cloudflare's plain edge runtime. So
-`@cloudflare/next-on-pages` (the "Pages" adapter) is **not** an option without
-rewriting the whole admin backend to edge code. Don't go that route.
+`npm run cf:build` and `npx wrangler deploy --dry-run` both pass. The bundle is
+~1.9 MB gzip (under the limit).
 
-## Recommended: Cloudflare Workers via OpenNext (`@opennextjs/cloudflare`)
+## One-time deploy steps
 
-This runs Next.js with Node.js compatibility (`nodejs_compat`), so
-`firebase-admin` works. The code already sets `preferRest: true` on Firestore
-(`src/lib/firebase/admin.ts`) which is what makes the Admin SDK work there.
-
-**It requires Next.js 15.** This project is on Next 14. So the steps are:
-
-1. Upgrade Next: `npm i next@15 react@19 react-dom@19` and run the codemod
-   `npx @next/codemod@latest upgrade latest`. Test `npm run build` and every
-   admin tab locally. (Ask me to do this as one focused change.)
-2. Add the adapter:
+1. `npm install` (gets `@opennextjs/cloudflare`, `wrangler`, `jose`)
+2. `npx wrangler login` and pick the ASA Cloudflare account
+3. Push the env vars to the Worker (same values as `.env.local`):
    ```bash
-   npm i -D @opennextjs/cloudflare wrangler
+   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT   # paste the base64
+   npx wrangler secret put ADMIN_EMAILS               # jallohosmanamadu311@gmail.com,...
    ```
-3. Add `wrangler.jsonc`:
-   ```jsonc
-   {
-     "name": "asaberea",
-     "main": ".open-next/worker.js",
-     "compatibility_date": "2025-03-01",
-     "compatibility_flags": ["nodejs_compat"],
-     "assets": { "directory": ".open-next/assets", "binding": "ASSETS" }
-   }
-   ```
-4. Add `open-next.config.ts`:
-   ```ts
-   import { defineCloudflareConfig } from "@opennextjs/cloudflare";
-   export default defineCloudflareConfig();
-   ```
-5. `package.json` scripts:
-   ```json
-   "cf:build": "opennextjs-cloudflare build",
-   "cf:deploy": "opennextjs-cloudflare build && wrangler deploy",
-   "cf:preview": "opennextjs-cloudflare build && wrangler dev"
-   ```
-6. In the Cloudflare dashboard (Workers project) or via `wrangler secret put`,
-   add every variable from `.env.local`:
-   - `NEXT_PUBLIC_FIREBASE_*` (plain vars)
-   - `FIREBASE_SERVICE_ACCOUNT` (secret)
-   - `ADMIN_EMAILS` (plain var)
-7. `npm run cf:deploy`. Add the deployed domain under
-   **Firebase Console > Authentication > Settings > Authorized domains**.
+   The `NEXT_PUBLIC_FIREBASE_*` values can be secrets too, or plain vars added
+   under **Workers > asaberea > Settings > Variables** in the dashboard. They
+   must be present at build time as well, so keep them in `.env.local` locally
+   and add them to the CI/deploy environment.
+4. `npm run cf:deploy`
+5. In the **Firebase Console > Authentication > Settings > Authorized domains**,
+   add the deployed domain (`asaberea.<subdomain>.workers.dev`, then your real
+   domain once DNS is set).
+6. Point the domain: Cloudflare dashboard > Workers > asaberea > Settings >
+   Domains & Routes > add `asaberea.org` (or a subdomain).
 
-## Fastest path if you need it live now
+## Local check before deploying
 
-Deploy to **Vercel** with zero code changes (it supports the Node runtime the
-admin routes use). Import the GitHub repo, paste the same env vars, done. You
-can move to Cloudflare later with the steps above.
+```bash
+npm run cf:preview     # builds and serves the Worker on http://localhost:8787
+```
 
-## What is already done for Cloudflare
+Test `/`, `/events`, an event page, `/contact`, and `/admin` (sign-in +
+one save on each tab). This exercises the same runtime Cloudflare uses.
 
-- `src/lib/firebase/admin.ts` uses the Firestore REST transport (`preferRest`),
-  required on Workers.
-- `.gitignore` covers `.dev.vars` and `.wrangler/`.
-- Security headers in `next.config.mjs` are host-agnostic and work on both.
+## Known warnings (safe to ignore)
+
+- `Failed to copy .../data-uri-to-buffer` during `cf:build` a transitive
+  `node-fetch` file. `gaxios` uses the global `fetch` on Workers, so it is not
+  needed at runtime. If Firestore ever fails to authenticate on Cloudflare,
+  revisit this first.
+- esbuild `-0` / floating-point equality warnings from bundled libraries.
+
+## Alternative: Vercel
+
+Vercel runs the Node runtime these routes use with zero extra config. Import
+the GitHub repo, add the `.env.local` variables in Project Settings, deploy.
+Nothing in the code is Vercel-specific.

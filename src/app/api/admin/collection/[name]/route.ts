@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // GET  /api/admin/collection/:name  -> list all docs (admin only)
-export async function GET(req: Request, { params }: { params: { name: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ name: string }> }) {
   const limited = guardRate(req, "admin-read", 120, 60_000);
   if (limited) return limited;
   const user = await requireAdmin(req);
@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: { name: string } }
   const db = adminDb();
   if (!db) return json({ error: "not_configured" }, 503);
 
-  const name = params.name;
+  const { name } = await params;
   const allowed = getResource(name) || (name === "contacts" ? { collection: COL.contacts } : null);
   if (!allowed) return json({ error: "unknown_resource" }, 404);
 
@@ -27,7 +27,7 @@ export async function GET(req: Request, { params }: { params: { name: string } }
 }
 
 // POST /api/admin/collection/:name  -> create a doc (admin only)
-export async function POST(req: Request, { params }: { params: { name: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ name: string }> }) {
   const limited = guardRate(req, "admin-write", 40, 60_000);
   if (limited) return limited;
   const user = await requireAdmin(req);
@@ -35,7 +35,8 @@ export async function POST(req: Request, { params }: { params: { name: string } 
   const db = adminDb();
   if (!db) return json({ error: "not_configured" }, 503);
 
-  const res = getResource(params.name);
+  const { name } = await params;
+  const res = getResource(name);
   if (!res) return json({ error: "unknown_resource" }, 404);
 
   let body: unknown;
@@ -49,7 +50,7 @@ export async function POST(req: Request, { params }: { params: { name: string } 
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
   const data = parsed.data as Record<string, unknown>;
-  if (params.name === "events" && !data.slug) {
+  if (name === "events" && !data.slug) {
     data.slug = slugify(String(data.title || ""));
   }
   const doc = { ...data, createdAt: Date.now() };
