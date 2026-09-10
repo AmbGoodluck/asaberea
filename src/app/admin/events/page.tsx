@@ -4,6 +4,7 @@ import EntityManager, { type Field } from "@/components/admin/EntityManager";
 
 const fields: Field[] = [
   { key: "title", label: "Event name", type: "text", placeholder: "Taste of Africa Night" },
+  { key: "slug", label: "URL slug (optional)", type: "text", placeholder: "auto from the name if left blank, e.g. mixer2026" },
   { key: "description", label: "Description", type: "textarea", placeholder: "What is this event about?" },
   { key: "imageUrl", label: "Flyer / image", type: "image", folder: "events" },
   { key: "date", label: "Date", type: "text", placeholder: "SEP 14 or 2026-09-14" },

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { grad } from "@/lib/data";
 import { pairFor } from "./cards";
@@ -12,8 +13,22 @@ function tileBg(e: EventDoc) {
 }
 
 function Tile({ e }: { e: EventDoc }) {
+  const down = useRef({ x: 0, y: 0, t: 0 });
   return (
-    <div className="tile">
+    <Link
+      href={`/events/${e.slug}`}
+      className="tile"
+      draggable={false}
+      onPointerDown={(ev) => {
+        down.current = { x: ev.clientX, y: ev.clientY, t: Date.now() };
+      }}
+      onClick={(ev) => {
+        const dx = Math.abs(ev.clientX - down.current.x);
+        const dy = Math.abs(ev.clientY - down.current.y);
+        // Treat a drag (reel scrub) as not-a-click.
+        if (dx + dy > 8) ev.preventDefault();
+      }}
+    >
       <div className="tile-img" style={tileBg(e)} />
       <div className="tile-vig" />
       <div className="chip">{e.category}</div>
@@ -24,7 +39,7 @@ function Tile({ e }: { e: EventDoc }) {
         </div>
         <div className="nm">{e.title}</div>
       </div>
-    </div>
+    </Link>
   );
 }
 

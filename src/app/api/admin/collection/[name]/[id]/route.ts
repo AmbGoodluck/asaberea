@@ -3,6 +3,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getResource } from "@/lib/resources";
 import { sanitizeObject } from "@/lib/sanitize";
 import { COL } from "@/lib/firebase/schema";
+import { slugify } from "@/lib/slug";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,8 +36,12 @@ export async function PUT(req: Request, { params }: Ctx) {
   const parsed = res.schema.safeParse(clean);
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
-  await db.collection(res.collection).doc(params.id).set(parsed.data, { merge: true });
-  return json({ id: params.id, ...parsed.data });
+  const data = parsed.data as Record<string, unknown>;
+  if (params.name === "events" && !data.slug) {
+    data.slug = slugify(String(data.title || ""));
+  }
+  await db.collection(res.collection).doc(params.id).set(data, { merge: true });
+  return json({ id: params.id, ...data });
 }
 
 // PATCH /api/admin/collection/contacts/:id  -> mark read/unread

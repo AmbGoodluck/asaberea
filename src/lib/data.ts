@@ -33,6 +33,7 @@ export const events: EventItem[] = [
 ];
 
 export type Role = {
+  name: string;
   role: string;
   duty: string;
   c1: string;
@@ -40,17 +41,25 @@ export type Role = {
   tag?: string;
 };
 
+// Executive Committee, 2025 to 2026. Names and positions only; contact details
+// are kept off the public site.
 export const roster: Role[] = [
-  { role: "President", duty: "Presides over ASA, our official voice, and steward of the association's vision.", c1: "#C2451F", c2: "#E39321", tag: "Primary EC" },
-  { role: "Vice-President", duty: "Steps in for the President and coordinates the ASA Networking Program.", c1: "#0E7C6F", c2: "#0A5148", tag: "Primary EC" },
-  { role: "Treasurer", duty: "Manages finances and fundraising, and keeps our records accurate and current.", c1: "#5A1B48", c2: "#8A2C6B", tag: "Primary EC" },
-  { role: "Chief Events Coordinator", duty: "Designs and runs the programs and events that bring ASA to life.", c1: "#D89321", c2: "#B2401F", tag: "Primary EC" },
-  { role: "Assistant Events Coordinator", duty: "Supports the Chief Coordinator across planning and event day.", c1: "#B23A20", c2: "#4A163B" },
-  { role: "Secretary", duty: "Keeps minutes, attendance, and the constitution; our historian and administrator.", c1: "#0A5148", c2: "#0E7C6F" },
-  { role: "Public Relations Officer", duty: "Designs materials and strategy that promote ASA and its events.", c1: "#3A2A12", c2: "#C89127" },
-  { role: "Assoc. PR Officer", duty: "Assists the PRO and steps in when needed across communications.", c1: "#4A163B", c2: "#7A2A5F" },
-  { role: "Bridging the Gap Coordinator", duty: "Builds alliances and inter-club relations across campus groups.", c1: "#0C6B63", c2: "#3A2A12" },
-  { role: "Webmaster / Dir. of Technology", duty: "Runs ASA's technology and keeps this very website current.", c1: "#C89127", c2: "#D98A1E" },
+  { name: "Carl Morel Njintang Ngatchou", role: "President", duty: "Leads ASA and represents the association across campus and beyond.", c1: "#C2451F", c2: "#E39321", tag: "Primary EC" },
+  { name: "Jimmicial Korsor", role: "Vice President of External Affairs", duty: "Manages partnerships and relationships outside ASA and the college.", c1: "#0E7C6F", c2: "#0A5148", tag: "Primary EC" },
+  { name: "Hansel King", role: "Vice President of Internal Affairs", duty: "Oversees internal operations and the day-to-day member experience.", c1: "#5A1B48", c2: "#8A2C6B", tag: "Primary EC" },
+  { name: "Remas Tutu", role: "Secretary", duty: "Keeps minutes, records, and official correspondence.", c1: "#0A5148", c2: "#0E7C6F", tag: "Primary EC" },
+  { name: "Nancy Tijani", role: "Treasurer", duty: "Manages the budget, dues, and financial planning.", c1: "#D89321", c2: "#B2401F", tag: "Primary EC" },
+  { name: "Mahlet Azezew", role: "Chief Events Coordinator", duty: "Designs and runs the programs and events that bring ASA to life.", c1: "#B23A20", c2: "#4A163B" },
+  { name: "Nahom Terrefe", role: "Assistant Events Coordinator", duty: "Supports the Chief Events Coordinator across planning and event day.", c1: "#3A2A12", c2: "#C89127" },
+  { name: "Jera Henderson", role: "Logistics Director", duty: "Handles setup, supplies, and the operations behind each event.", c1: "#4A163B", c2: "#7A2A5F" },
+  { name: "Pierre Diatta", role: "Activities and Sports Director", duty: "Organizes recreational and athletic activities for members.", c1: "#0C6B63", c2: "#3A2A12" },
+  { name: "Saratou Bako Bagassa", role: "Social Media Coordinator", duty: "Runs ASA's social channels and digital presence.", c1: "#C89127", c2: "#D98A1E" },
+  { name: "Hope Michael", role: "Interclub Relations Director", duty: "Builds ties with other campus organizations.", c1: "#0E7C6F", c2: "#0A5148" },
+  { name: "Victor Mucyo", role: "Partnership Director", duty: "Develops sponsorships and institutional partnerships.", c1: "#5A1B48", c2: "#8A2C6B" },
+  { name: "Osman Jalloh", role: "Fundraising Director", duty: "Leads fundraising campaigns and donor outreach.", c1: "#C2451F", c2: "#E39321" },
+  { name: "Claudia Wanjira", role: "Driver and Logistics Director", duty: "Coordinates transportation and on-the-ground logistics.", c1: "#B23A20", c2: "#4A163B" },
+  { name: "Elom Amuzu", role: "Technology Director", duty: "Maintains ASA's website and technical tools.", c1: "#0A5148", c2: "#0E7C6F" },
+  { name: "Love Cheng", role: "Director of Continuous Improvement", duty: "Reviews how ASA works and drives steady improvements.", c1: "#D89321", c2: "#B2401F" },
 ];
 
 export type Product = {

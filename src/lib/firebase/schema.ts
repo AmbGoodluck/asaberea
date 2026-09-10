@@ -17,6 +17,7 @@ export const STATS_DOC = "current";
 export type EventDoc = {
   id: string;
   title: string;
+  slug: string; // URL segment, e.g. /events/mixer2026
   description: string;
   imageUrl: string;
   date: string; // ISO date, e.g. 2026-09-14
@@ -98,6 +99,7 @@ const url = z.string().trim().url().max(1000).or(z.literal(""));
 
 export const eventInput = z.object({
   title: short,
+  slug: z.string().trim().max(80).regex(/^[a-z0-9-]*$/, "lowercase letters, numbers and hyphens only").default(""),
   description: long,
   imageUrl: url,
   date: z.string().trim().max(40),

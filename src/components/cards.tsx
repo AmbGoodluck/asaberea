@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { grad } from "@/lib/data";
 import type { EventDoc, LeaderDoc } from "@/lib/firebase/schema";
 import type { Product as SeedProduct } from "@/lib/data";
@@ -24,7 +25,7 @@ function bg(imageUrl: string, c1?: string, c2?: string, seed = "x") {
 
 export function EventCard({ e }: { e: EventDoc }) {
   return (
-    <div className="card reveal">
+    <Link href={`/events/${e.slug}`} className="card reveal card-link">
       <div className="ph" style={bg(e.imageUrl, e.c1, e.c2, e.title)}>
         {!e.imageUrl && <div className="grain" />}
         <div className="chip">{e.category}</div>
@@ -35,14 +36,12 @@ export function EventCard({ e }: { e: EventDoc }) {
         </div>
         <div className="nm ny">{e.title}</div>
         <div className="ds">{e.description}</div>
-        {e.link ? (
-          <a className="ev-link" href={e.link} target="_blank" rel="noreferrer">
-            Details
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-          </a>
-        ) : null}
+        <span className="ev-link" aria-hidden>
+          View details
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 

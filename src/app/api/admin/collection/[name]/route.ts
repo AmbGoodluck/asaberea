@@ -3,6 +3,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getResource } from "@/lib/resources";
 import { sanitizeObject } from "@/lib/sanitize";
 import { COL } from "@/lib/firebase/schema";
+import { slugify } from "@/lib/slug";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,7 +48,11 @@ export async function POST(req: Request, { params }: { params: { name: string } 
   const parsed = res.schema.safeParse(clean);
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
-  const doc = { ...parsed.data, createdAt: Date.now() };
+  const data = parsed.data as Record<string, unknown>;
+  if (params.name === "events" && !data.slug) {
+    data.slug = slugify(String(data.title || ""));
+  }
+  const doc = { ...data, createdAt: Date.now() };
   const ref = await db.collection(res.collection).add(doc);
   return json({ id: ref.id, ...doc }, 201);
 }

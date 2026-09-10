@@ -11,6 +11,7 @@ import {
   type ImageSlotDoc,
 } from "./firebase/schema";
 import * as seed from "./data";
+import { slugify } from "./slug";
 
 // Content getters. When the Admin SDK is configured they read live data from
 // Firestore; otherwise they return the seed content so the public site is
@@ -40,10 +41,15 @@ export async function getStats(): Promise<StatsDoc> {
 
 export async function getEvents(): Promise<EventDoc[]> {
   const live = await readCollection<EventDoc>(COL.events);
-  if (live && live.length) return live.sort((a, b) => b.createdAt - a.createdAt);
+  if (live && live.length) {
+    return live
+      .map((e) => ({ ...e, slug: e.slug || slugify(e.title) || e.id }))
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }
   return seed.events.map((e, i) => ({
     id: "seed-" + i,
     title: e.title,
+    slug: slugify(e.title),
     description: e.desc,
     imageUrl: "",
     date: e.date,
@@ -56,6 +62,13 @@ export async function getEvents(): Promise<EventDoc[]> {
     c1: e.c1,
     c2: e.c2,
   }));
+}
+
+export async function getEventBySlug(slug: string): Promise<EventDoc | null> {
+  const all = await getEvents();
+  const matches = all.filter((e) => e.slug === slug);
+  if (matches.length) return matches.sort((a, b) => b.createdAt - a.createdAt)[0];
+  return all.find((e) => e.id === slug) ?? null;
 }
 
 export async function getSpotlights(): Promise<SpotlightDoc[]> {
@@ -77,7 +90,7 @@ export async function getLeadership(): Promise<LeaderDoc[]> {
   if (live && live.length) return live.sort((a, b) => a.order - b.order);
   return seed.roster.map((r, i) => ({
     id: "seed-" + i,
-    name: "Position open",
+    name: r.name,
     position: r.role,
     major: "",
     description: r.duty,

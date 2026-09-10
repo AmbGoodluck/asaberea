@@ -44,9 +44,22 @@ export function adminAuth(): Auth | null {
   const a = getAdminApp();
   return a ? getAuth(a) : null;
 }
+let db: Firestore | null = null;
 export function adminDb(): Firestore | null {
   const a = getAdminApp();
-  return a ? getFirestore(a) : null;
+  if (!a) return null;
+  if (!db) {
+    db = getFirestore(a);
+    try {
+      // Use the Firestore REST transport instead of gRPC. Required on edge /
+      // serverless runtimes (Cloudflare Workers, some Vercel configs) and
+      // harmless on Node. settings() must run before the first use.
+      db.settings({ preferRest: true });
+    } catch {
+      // already initialized, ignore
+    }
+  }
+  return db;
 }
 
 // Comma-separated allowlist, lower-cased. e.g. ADMIN_EMAILS="a@x.com,b@y.com"

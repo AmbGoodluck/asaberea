@@ -11,8 +11,14 @@ and it becomes fully live and admin-managed, with no code changes to the pages.
 ## Public pages
 
 `/` Home (animated Africa hero, live event gallery, stats, pillars, member
-spotlight) · `/about` · `/events` · `/leadership` · `/gallery` · `/store` ·
-`/contact` (writes to the admin inbox).
+spotlight) · `/about` · `/events` and per-event pages at `/events/<slug>` ·
+`/leadership` · `/gallery` · `/store` · `/contact` (writes to the admin inbox).
+
+Every "Become a member" / "Join ASA" button links to the CampusGroups signup
+(`src/lib/links.ts`).
+
+Deploy notes: [`FIREBASE_SETUP.md`](./FIREBASE_SETUP.md),
+[`CLOUDFLARE_DEPLOY.md`](./CLOUDFLARE_DEPLOY.md).
 
 ## Admin portal (`/admin`)
 
