@@ -1,5 +1,5 @@
 import "server-only";
-import { adminDb } from "./firebase/admin";
+import { fdb } from "./firestore-rest";
 import {
   COL,
   STATS_DOC,
@@ -13,27 +13,24 @@ import {
 import * as seed from "./data";
 import { slugify } from "./slug";
 
-// Content getters. When the Admin SDK is configured they read live data from
-// Firestore; otherwise they return the seed content so the public site is
-// fully functional before Firebase is connected.
+// Content getters. When the service account is configured they read live data
+// from Firestore over REST; otherwise they return the seed content so the
+// public site is fully functional before Firebase is connected.
 
 async function readCollection<T>(name: string): Promise<T[] | null> {
-  const db = adminDb();
-  if (!db) return null;
+  if (!fdb.enabled) return null;
   try {
-    const snap = await db.collection(name).get();
-    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as object) })) as T[];
+    return (await fdb.list(name)) as T[] | null;
   } catch {
     return null;
   }
 }
 
 export async function getStats(): Promise<StatsDoc> {
-  const db = adminDb();
-  if (db) {
+  if (fdb.enabled) {
     try {
-      const doc = await db.collection(COL.stats).doc(STATS_DOC).get();
-      if (doc.exists) return doc.data() as StatsDoc;
+      const doc = await fdb.get(COL.stats, STATS_DOC);
+      if (doc) return doc as unknown as StatsDoc;
     } catch {}
   }
   return { nations: 9, eventsPerYear: 24, ecLeaders: 10, joinPrice: 6 };
@@ -116,15 +113,14 @@ export async function getGallery(): Promise<GalleryDoc[]> {
 }
 
 export async function getImageSlots(): Promise<Record<string, string>> {
-  const db = adminDb();
   const out: Record<string, string> = {};
-  if (!db) return out;
+  if (!fdb.enabled) return out;
   try {
-    const snap = await db.collection(COL.images).get();
-    snap.docs.forEach((d) => {
-      const data = d.data() as ImageSlotDoc;
+    const docs = (await fdb.list(COL.images)) || [];
+    for (const d of docs) {
+      const data = d as unknown as ImageSlotDoc & { id: string };
       if (data?.url) out[d.id] = data.url;
-    });
+    }
   } catch {}
   return out;
 }

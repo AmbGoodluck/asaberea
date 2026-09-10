@@ -1,5 +1,5 @@
 import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
-import { adminDb } from "@/lib/firebase/admin";
+import { fdb } from "@/lib/firestore-rest";
 import { getResource } from "@/lib/resources";
 import { sanitizeObject } from "@/lib/sanitize";
 import { COL } from "@/lib/firebase/schema";
@@ -20,8 +20,7 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
   const { name, id } = await params;
   const res = getResource(name);
   if (!res) return json({ error: "unknown_resource" }, 404);
@@ -41,7 +40,8 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (name === "events" && !data.slug) {
     data.slug = slugify(String(data.title || ""));
   }
-  await db.collection(res.collection).doc(id).set(data, { merge: true });
+  const ok = await fdb.set(res.collection, id, data);
+  if (!ok) return json({ error: "write_failed" }, 502);
   return json({ id, ...data });
 }
 
@@ -51,8 +51,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
   const { name, id } = await params;
   if (name !== "contacts") return json({ error: "unsupported" }, 400);
   if (!safeId(id)) return json({ error: "bad_id" }, 400);
@@ -61,7 +60,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
   try {
     body = await req.json();
   } catch {}
-  await db.collection(COL.contacts).doc(id).set({ read: Boolean(body.read) }, { merge: true });
+  const ok = await fdb.set(COL.contacts, id, { read: Boolean(body.read) });
+  if (!ok) return json({ error: "write_failed" }, 502);
   return json({ id, read: Boolean(body.read) });
 }
 
@@ -71,14 +71,14 @@ export async function DELETE(req: Request, { params }: Ctx) {
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
   const { name, id } = await params;
   const res = getResource(name);
   const collection = res?.collection || (name === "contacts" ? COL.contacts : null);
   if (!collection) return json({ error: "unknown_resource" }, 404);
   if (!safeId(id)) return json({ error: "bad_id" }, 400);
 
-  await db.collection(collection).doc(id).delete();
+  const ok = await fdb.del(collection, id);
+  if (!ok) return json({ error: "delete_failed" }, 502);
   return json({ ok: true });
 }

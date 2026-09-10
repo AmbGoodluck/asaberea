@@ -1,5 +1,5 @@
 import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
-import { adminDb } from "@/lib/firebase/admin";
+import { fdb } from "@/lib/firestore-rest";
 import { imageSlotInput, COL } from "@/lib/firebase/schema";
 
 export const runtime = "nodejs";
@@ -11,14 +11,13 @@ export async function GET(req: Request) {
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
-  const snap = await db.collection(COL.images).get();
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
+  const docs = (await fdb.list(COL.images)) || [];
   const items: Record<string, string> = {};
-  snap.docs.forEach((d) => {
-    const url = (d.data() as { url?: string }).url;
+  for (const d of docs) {
+    const url = (d as { url?: string }).url;
     if (url) items[d.id] = url;
-  });
+  }
   return json({ items });
 }
 
@@ -28,8 +27,7 @@ export async function PUT(req: Request) {
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
 
   let body: unknown;
   try {
@@ -42,6 +40,7 @@ export async function PUT(req: Request) {
 
   const { slot, url } = parsed.data;
   if (slot.includes("/")) return json({ error: "bad_slot" }, 400);
-  await db.collection(COL.images).doc(slot).set({ url, updatedAt: Date.now() }, { merge: true });
+  const ok = await fdb.set(COL.images, slot, { url, updatedAt: Date.now() });
+  if (!ok) return json({ error: "write_failed" }, 502);
   return json({ slot, url });
 }

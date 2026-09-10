@@ -1,5 +1,5 @@
 import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
-import { adminDb } from "@/lib/firebase/admin";
+import { fdb } from "@/lib/firestore-rest";
 import { getResource } from "@/lib/resources";
 import { sanitizeObject } from "@/lib/sanitize";
 import { COL } from "@/lib/firebase/schema";
@@ -14,15 +14,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ name: st
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
 
   const { name } = await params;
   const allowed = getResource(name) || (name === "contacts" ? { collection: COL.contacts } : null);
   if (!allowed) return json({ error: "unknown_resource" }, 404);
 
-  const snap = await db.collection(allowed.collection).get();
-  const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const items = (await fdb.list(allowed.collection)) || [];
   return json({ items });
 }
 
@@ -32,8 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ name: s
   if (limited) return limited;
   const user = await requireAdmin(req);
   if (!user) return json({ error: "unauthorized" }, 401);
-  const db = adminDb();
-  if (!db) return json({ error: "not_configured" }, 503);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
 
   const { name } = await params;
   const res = getResource(name);
@@ -54,6 +51,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ name: s
     data.slug = slugify(String(data.title || ""));
   }
   const doc = { ...data, createdAt: Date.now() };
-  const ref = await db.collection(res.collection).add(doc);
-  return json({ id: ref.id, ...doc }, 201);
+  const saved = await fdb.add(res.collection, doc);
+  if (!saved) return json({ error: "write_failed" }, 502);
+  return json({ id: saved.id, ...doc }, 201);
 }

@@ -1,65 +1,14 @@
-// Firebase Admin SDK (server only). Never import this into a client component.
+// Server-only Firebase helpers. We do NOT use the firebase-admin SDK here: it
+// bundles protobuf.js (needs eval) and does not run on Cloudflare Workers.
+// Firestore access goes through lib/firestore-rest.ts (REST + a jose-signed
+// OAuth token). ID tokens are verified in lib/verify-token.ts.
 import "server-only";
-import {
-  getApps,
-  initializeApp,
-  cert,
-  type App,
-} from "firebase-admin/app";
-import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { fdb, firestoreEnabled } from "../firestore-rest";
 
-// Note: we deliberately do NOT import "firebase-admin/auth" here. ID tokens are
-// verified with `jose` in lib/verify-token.ts so the code runs on Cloudflare
-// Workers. firebase-admin is used only for Firestore (over the REST transport).
+export { fdb };
 
-function parseServiceAccount() {
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!raw) return null;
-  try {
-    // Accept either raw JSON or base64-encoded JSON.
-    const json = raw.trim().startsWith("{")
-      ? raw
-      : Buffer.from(raw, "base64").toString("utf8");
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-const serviceAccount = parseServiceAccount();
-export const adminEnabled = Boolean(serviceAccount);
-
-let app: App | null = null;
-function getAdminApp(): App | null {
-  if (!adminEnabled) return null;
-  if (!app) {
-    app = getApps().length
-      ? getApps()[0]
-      : initializeApp({
-          credential: cert(serviceAccount),
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        });
-  }
-  return app;
-}
-
-let db: Firestore | null = null;
-export function adminDb(): Firestore | null {
-  const a = getAdminApp();
-  if (!a) return null;
-  if (!db) {
-    db = getFirestore(a);
-    try {
-      // Use the Firestore REST transport instead of gRPC. Required on edge /
-      // serverless runtimes (Cloudflare Workers, some Vercel configs) and
-      // harmless on Node. settings() must run before the first use.
-      db.settings({ preferRest: true });
-    } catch {
-      // already initialized, ignore
-    }
-  }
-  return db;
-}
+// True once the service-account credential is present.
+export const adminEnabled = firestoreEnabled;
 
 // Comma-separated allowlist, lower-cased. e.g. ADMIN_EMAILS="a@x.com,b@y.com"
 export function adminEmails(): string[] {
@@ -68,6 +17,7 @@ export function adminEmails(): string[] {
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
 }
+
 export function isAdminEmail(email?: string | null): boolean {
   if (!email) return false;
   return adminEmails().includes(email.toLowerCase());

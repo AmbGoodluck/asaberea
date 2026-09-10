@@ -1,65 +1,60 @@
-# Deploying to Cloudflare
+# Cloudflare deployment
 
-This app is wired for **Cloudflare Workers via OpenNext**
-(`@opennextjs/cloudflare`). It runs Next.js with Node.js compatibility so the
-public site and the `/api` admin backend both work on Cloudflare.
+**Live:** https://asaberea.jallohosmanamadu311.workers.dev
+Worker name: `asaberea` · account: `jallohosmanamadu311@gmail.com`
 
-## What is already set up
+Runs on Cloudflare Workers via OpenNext (`@opennextjs/cloudflare`), Next.js 15
+with `nodejs_compat`.
 
-- `open-next.config.ts`, `wrangler.jsonc` (name `asaberea`, `nodejs_compat`)
-- `next.config.mjs` calls `initOpenNextCloudflareForDev()` for local dev
-- Firestore uses the **REST transport** (`preferRest`), required on Workers
-  (`src/lib/firebase/admin.ts`)
-- Firebase **ID tokens are verified with `jose`** (`src/lib/verify-token.ts`),
-  not the `firebase-admin/auth` module, which does not bundle for Workers
-- Scripts in `package.json`:
-  - `npm run cf:build` build the Worker into `.open-next/`
-  - `npm run cf:preview` build + run it locally on `workerd`
-  - `npm run cf:deploy` build + deploy
-  - `npm run cf:typegen` regenerate `cloudflare-env.d.ts`
-
-`npm run cf:build` and `npx wrangler deploy --dry-run` both pass. The bundle is
-~1.9 MB gzip (under the limit).
-
-## One-time deploy steps
-
-1. `npm install` (gets `@opennextjs/cloudflare`, `wrangler`, `jose`)
-2. `npx wrangler login` and pick the ASA Cloudflare account
-3. Push the env vars to the Worker (same values as `.env.local`):
-   ```bash
-   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT   # paste the base64
-   npx wrangler secret put ADMIN_EMAILS               # jallohosmanamadu311@gmail.com,...
-   ```
-   The `NEXT_PUBLIC_FIREBASE_*` values can be secrets too, or plain vars added
-   under **Workers > asaberea > Settings > Variables** in the dashboard. They
-   must be present at build time as well, so keep them in `.env.local` locally
-   and add them to the CI/deploy environment.
-4. `npm run cf:deploy`
-5. In the **Firebase Console > Authentication > Settings > Authorized domains**,
-   add the deployed domain (`asaberea.<subdomain>.workers.dev`, then your real
-   domain once DNS is set).
-6. Point the domain: Cloudflare dashboard > Workers > asaberea > Settings >
-   Domains & Routes > add `asaberea.org` (or a subdomain).
-
-## Local check before deploying
+## Redeploying
 
 ```bash
-npm run cf:preview     # builds and serves the Worker on http://localhost:8787
+npm run cf:deploy      # build + deploy
+npm run cf:preview     # build + run locally on workerd (http://localhost:8787)
 ```
 
-Test `/`, `/events`, an event page, `/contact`, and `/admin` (sign-in +
-one save on each tab). This exercises the same runtime Cloudflare uses.
+`git push` does **not** auto-deploy. Run `npm run cf:deploy` after changes, or
+connect the GitHub repo in the Cloudflare dashboard (Workers > asaberea >
+Settings > Build) for push-to-deploy.
 
-## Known warnings (safe to ignore)
+## Why there is no firebase-admin
 
-- `Failed to copy .../data-uri-to-buffer` during `cf:build` a transitive
-  `node-fetch` file. `gaxios` uses the global `fetch` on Workers, so it is not
-  needed at runtime. If Firestore ever fails to authenticate on Cloudflare,
-  revisit this first.
-- esbuild `-0` / floating-point equality warnings from bundled libraries.
+`firebase-admin` bundles protobuf.js, which calls `eval()` and is rejected by
+the Workers runtime (`EvalError: Code generation from strings disallowed`).
+So this project talks to Google directly:
 
-## Alternative: Vercel
+- `src/lib/firestore-rest.ts` a small Firestore REST client. It mints a Google
+  OAuth token with a `jose`-signed JWT (service-account key) and calls the
+  Firestore v1 REST API for list / get / add / set / delete.
+- `src/lib/verify-token.ts` verifies Firebase ID tokens with `jose` against
+  Google's public keys.
+- `src/lib/firebase/client.ts` no `firebase/firestore` import (it also pulls
+  protobuf.js). The admin UI only uses `firebase/auth` and `firebase/storage`.
 
-Vercel runs the Node runtime these routes use with zero extra config. Import
-the GitHub repo, add the `.env.local` variables in Project Settings, deploy.
-Nothing in the code is Vercel-specific.
+`firebase-admin` stays in `package.json` only for the Node scripts
+(`set-admins`, `import-gallery`), which never run on the Worker.
+
+## Secrets (already set on the Worker)
+
+```
+FIREBASE_SERVICE_ACCOUNT   (base64 of the service-account JSON)
+ADMIN_EMAILS               jallohosmanamadu311@gmail.com,jalloho@berea.edu
+```
+
+`NEXT_PUBLIC_FIREBASE_*` are inlined from `.env.local` at build time, so they
+must be present when you run `npm run cf:deploy`. To rotate a secret:
+
+```bash
+printf '%s' "NEW_VALUE" | npx wrangler secret put FIREBASE_SERVICE_ACCOUNT
+```
+
+## Custom domain (later)
+
+Cloudflare dashboard > Workers & Pages > asaberea > Settings > Domains & Routes
+> Add > enter `asaberea.org` (or a subdomain). Then add that domain under
+**Firebase Console > Authentication > Settings > Authorized domains**.
+
+## Known warnings (harmless)
+
+- `Failed to copy .../data-uri-to-buffer` during build a stray transitive file.
+- esbuild `-0` equality warnings from bundled libraries.

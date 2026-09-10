@@ -1,5 +1,5 @@
 import { json } from "@/lib/auth-guard";
-import { adminDb, adminEnabled } from "@/lib/firebase/admin";
+import { fdb } from "@/lib/firestore-rest";
 import { contactInput, COL } from "@/lib/firebase/schema";
 import { sanitizeObject } from "@/lib/sanitize";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
@@ -32,18 +32,16 @@ export async function POST(req: Request) {
   const parsed = contactInput.safeParse(clean);
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
-  if (!adminEnabled) {
-    // No backend yet: accept so the UI works during the demo, but do not persist.
+  if (!fdb.enabled) {
+    // No backend yet: accept so the UI works, but do not persist.
     return json({ ok: true, stored: false });
   }
-  const db = adminDb();
-  if (!db) return json({ ok: true, stored: false });
 
-  await db.collection(COL.contacts).add({
+  const saved = await fdb.add(COL.contacts, {
     ...parsed.data,
     read: false,
     createdAt: Date.now(),
     ip,
   });
-  return json({ ok: true, stored: true }, 201);
+  return json({ ok: true, stored: Boolean(saved) }, saved ? 201 : 200);
 }
