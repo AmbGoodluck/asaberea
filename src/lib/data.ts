@@ -1,5 +1,5 @@
 // ============================================================
-// ASA Berea — content data
+// ASA Berea, content data
 // This is the single source of truth for now. When the admin
 // portal + Composio are wired up (see lib/composio.ts), these
 // arrays get replaced by live fetches with the same shapes.
@@ -21,14 +21,14 @@ export const events: EventItem[] = [
   { date: "SEP 14", time: "6:00 PM", title: "Taste of Africa Night", venue: "Woods-Penn", category: "Cultural", c1: "#C2451F", c2: "#E39321", desc: "Food, music, and stories from every corner of the continent.", status: "upcoming" },
   { date: "SEP 21", time: "5:30 PM", title: "Welcome Mixer", venue: "Alumni Bldg", category: "Social", c1: "#0E7C6F", c2: "#0A5148", desc: "Meet the EC and your new ASA family over snacks and games.", status: "upcoming" },
   { date: "OCT 02", time: "7:00 PM", title: "Culture & Conversation", venue: "Fireside", category: "Panel", c1: "#5A1B48", c2: "#8A2C6B", desc: "An open forum on identity, home, and belonging.", status: "upcoming" },
-  { date: "OCT 10", time: "8:00 PM", title: "Afrobeats Night", venue: "Seabury", category: "Social", c1: "#D89321", c2: "#B2401F", desc: "The dancefloor opens — Afrobeats, Amapiano, and more.", status: "upcoming" },
+  { date: "OCT 10", time: "8:00 PM", title: "Afrobeats Night", venue: "Seabury", category: "Social", c1: "#D89321", c2: "#B2401F", desc: "The dancefloor opens, Afrobeats, Amapiano, and more.", status: "upcoming" },
   { date: "OCT 18", time: "4:00 PM", title: "Jollof Cook-off", venue: "Danforth", category: "Cultural", c1: "#B23A20", c2: "#4A163B", desc: "Which country makes it best? Come taste and decide.", status: "upcoming" },
   { date: "OCT 25", time: "6:30 PM", title: "General Body Meeting", venue: "Draper 204", category: "Meeting", c1: "#0A5148", c2: "#0E7C6F", desc: "Updates, planning, and your voice in what's next.", status: "upcoming" },
-  { date: "NOV 20", time: "8:00 PM", title: "ASA Annual Banquet", venue: "Boone Tavern", category: "Cultural", c1: "#C2451F", c2: "#E39321", desc: "Our biggest night — dinner, awards, and the outdooring.", status: "upcoming" },
+  { date: "NOV 20", time: "8:00 PM", title: "ASA Annual Banquet", venue: "Boone Tavern", category: "Cultural", c1: "#C2451F", c2: "#E39321", desc: "Our biggest night, dinner, awards, and the outdooring.", status: "upcoming" },
   { date: "APR 12", time: "6:00 PM", title: "Africa Week Kickoff", venue: "Woods-Penn", category: "Cultural", c1: "#B2401F", c2: "#D89321", desc: "A full week celebrating the continent, opening night.", status: "past" },
   { date: "MAR 08", time: "7:00 PM", title: "Career & Grad Panel", venue: "Carter", category: "Panel", c1: "#3A2A12", c2: "#C89127", desc: "Alumni and mentors on life after Berea.", status: "past" },
   { date: "FEB 14", time: "8:00 PM", title: "Diaspora Night", venue: "Baird", category: "Cultural", c1: "#4A163B", c2: "#B23A20", desc: "A celebration of Africa and its diaspora, together.", status: "past" },
-  { date: "JAN 30", time: "5:30 PM", title: "New Semester Kickoff", venue: "Union Lounge", category: "Social", c1: "#0E7C6F", c2: "#3A2A12", desc: "Back together — reconnect and plan the term.", status: "past" },
+  { date: "JAN 30", time: "5:30 PM", title: "New Semester Kickoff", venue: "Union Lounge", category: "Social", c1: "#0E7C6F", c2: "#3A2A12", desc: "Back together, reconnect and plan the term.", status: "past" },
   { date: "DEC 05", time: "7:30 PM", title: "Movie & Game Night", venue: "Union Lounge", category: "Social", c1: "#0C6B63", c2: "#08514B", desc: "Films, board games, and jollof to close the year.", status: "past" },
 ];
 
@@ -103,6 +103,14 @@ export const gallery: GalleryItem[] = [
   { caption: "Movie Night", c1: "#0C6B63", c2: "#08514B", ratio: 1.35 },
   { caption: "Career Panel", c1: "#B2401F", c2: "#D89321", ratio: 1 },
   { caption: "Outdooring", c1: "#4A163B", c2: "#C2451F", ratio: 1.25 },
+];
+
+export type Spotlight = { name: string; headline: string; description: string };
+
+export const spotlights: Spotlight[] = [
+  { name: "Aminata K.", headline: "Published undergraduate researcher", description: "Co-authored a paper on renewable microgrids and presented at the regional science symposium." },
+  { name: "Kwame O.", headline: "National debate finalist", description: "Reached the national collegiate debate finals and now coaches first-year members." },
+  { name: "Zainab M.", headline: "Founder, campus mentorship circle", description: "Started a mentorship circle pairing new international students with upperclass members." },
 ];
 
 export const pillars = [

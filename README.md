@@ -1,67 +1,94 @@
-# ASA Berea — Website
+# ASA Berea
 
-The website for the **African Students Association (ASA)** at Berea College.
-Built with **Next.js 14 (App Router)** + **TypeScript**. No database yet —
-content lives in `src/lib/data.ts` and is designed to be swapped for a live
-admin-managed source (via Composio) with zero changes to the pages.
+Website and admin portal for the **African Students Association (ASA)** at
+Berea College. Built with **Next.js 14 (App Router)** and **TypeScript**, with
+**Firebase** (Auth, Firestore, Storage) powering a no-code admin portal at
+`/admin`.
 
-## Pages
+The public site works on seed content out of the box. Add your Firebase keys
+and it becomes fully live and admin-managed, with no code changes to the pages.
 
-| Route | Page |
-| --- | --- |
-| `/` | Home — animated hero, draggable event gallery, stats, pillars, join |
-| `/about` | Mission, the four awareness pillars, how membership works |
-| `/stories` | Blog & Stories — featured post + filterable grid |
-| `/events` | Upcoming + past events, filterable by category |
-| `/leadership` | The 10 Executive Committee roles (from the ASA constitution) |
-| `/gallery` | Photo wall with lightbox |
-| `/store` | Merch showcase with external checkout |
+## Public pages
 
-## Getting started
+`/` Home (animated Africa hero, live event gallery, stats, pillars, member
+spotlight) · `/about` · `/events` · `/leadership` · `/gallery` · `/store` ·
+`/contact` (writes to the admin inbox).
 
-```bash
-npm install
-npm run dev          # http://localhost:3000
-```
+## Admin portal (`/admin`)
 
-Production build:
+Sign in with an authorized Google account. Tabs:
 
-```bash
-npm run build
-npm start
-```
+- **Events** name, description, flyer, date, time, venue, link, and an
+  upcoming/past toggle. Past events move to the archive automatically.
+- **Stats** the four homepage numbers (nations, events a year, EC leaders, dues).
+- **Spotlight** feature students and accomplishments (shown on the homepage).
+- **Leadership** the Executive Committee roster (name, position, major, photo).
+- **Images** swap the hero and page images, and manage the photo gallery.
+- **Inbox** read and manage contact-form submissions.
+
+## Setup
+
+1. Install and run:
+
+   ```bash
+   npm install
+   cp .env.example .env.local   # then fill in the values
+   npm run dev                  # http://localhost:3000
+   ```
+
+2. **Firebase keys.** In the Firebase console:
+   - Project settings → General → Your apps → copy the web config into the
+     `NEXT_PUBLIC_FIREBASE_*` values.
+   - Project settings → Service accounts → Generate new private key → paste the
+     JSON into `FIREBASE_SERVICE_ACCOUNT` (one line, or base64).
+   - Authentication → Sign-in method → enable **Google**.
+   - Put admin emails in `ADMIN_EMAILS` (comma-separated).
+
+3. **Grant admin rights.** Each admin signs in once at `/admin`, then run:
+
+   ```bash
+   npm run set-admins
+   ```
+
+   This sets the `admin` custom claim used by the security rules.
+
+4. **Deploy the security rules** (needs the Firebase CLI, `npm i -g firebase-tools`):
+
+   ```bash
+   firebase deploy --only firestore:rules,storage
+   ```
+
+## Security
+
+- All content writes go through server API routes that verify the Firebase ID
+  token and the admin allowlist; direct client writes are denied by the rules.
+- The contact endpoint is rate limited (5 requests / 10 min per IP), sanitizes
+  and validates every field (zod), and includes a honeypot for bots.
+- The contact inbox is never client-readable; it is server-only.
+- Storage uploads are limited to admins, image types only, under 6 MB.
+- No secrets are committed. Only `NEXT_PUBLIC_*` values reach the browser.
 
 ## Project structure
 
 ```
 src/
-  app/                 # routes (App Router) + globals.css design system
-  components/          # Nav, Footer, EventReel, cards, client interactions
+  app/
+    (site)/            public pages (share the site chrome)
+    admin/             admin portal (own chrome, auth-gated)
+    api/               contact + admin API routes (server, secured)
+    globals.css        design system
+  components/          Nav, Footer, hero, cards, admin UI
   lib/
-    data.ts            # all content (single source of truth for now)
-    composio.ts        # integration layer stub — swap data.ts -> async getters here
-public/logo.png        # ASA roundel
+    firebase/          client + admin SDK, schema + zod
+    content.ts         reads Firestore, falls back to seed data
+    data.ts            seed content
+    sanitize.ts, ratelimit.ts, auth-guard.ts
+firestore.rules, storage.rules, firebase.json
+scripts/set-admin-claims.mjs
 ```
 
-## Design system
+## Design
 
-Everything is driven by CSS custom properties in `src/app/globals.css`
-(the `:root` block), with a full dark-mode palette. Brand colors are pulled
-from the ASA logo: warm paper `#F1EBDE`, ink `#1F1810`, and kente accents —
-rust `#B23A20`, gold `#C89127`, teal `#0C6B63`, plum `#4A163B`.
-Type pairs **Newsreader** (display serif) with the system UI font.
-
-## Next steps
-
-- **Photos** — drop real event photos into `public/` and reference them from
-  `src/lib/data.ts` (replace the gradient placeholders).
-- **Admin + Composio** — implement the getters in `src/lib/composio.ts` and
-  switch page imports from `@/lib/data` to `@/lib/composio`.
-- **Store checkout** — set `NEXT_PUBLIC_STORE_CHECKOUT_BASE` to your Stripe
-  payment link base.
-- **Instagram feed** — wire the live feed on Home + footer (Phase 3).
-
-## Environment
-
-Copy `.env.example` to `.env.local` and fill in as integrations come online.
-No secrets are committed.
+Warm kente-derived palette driven by CSS custom properties in `globals.css`,
+full dark mode, Newsreader display serif paired with the system UI font, and
+an animated SVG Africa motif on the homepage hero.

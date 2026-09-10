@@ -7,11 +7,11 @@ import { useEffect, useState } from "react";
 const links = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/stories", label: "Stories" },
   { href: "/events", label: "Events" },
   { href: "/leadership", label: "Leadership" },
   { href: "/gallery", label: "Gallery" },
   { href: "/store", label: "Store" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Nav() {

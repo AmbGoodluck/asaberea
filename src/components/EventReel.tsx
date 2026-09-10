@@ -1,17 +1,26 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { events, grad, type EventItem } from "@/lib/data";
+import { grad } from "@/lib/data";
+import { pairFor } from "./cards";
+import type { EventDoc } from "@/lib/firebase/schema";
 
-function Tile({ e }: { e: EventItem }) {
+function tileBg(e: EventDoc) {
+  if (e.imageUrl) return { backgroundImage: `url(${e.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" };
+  const [a, b] = e.c1 && e.c2 ? [e.c1, e.c2] : pairFor(e.title);
+  return { background: grad(a, b) };
+}
+
+function Tile({ e }: { e: EventDoc }) {
   return (
     <div className="tile">
-      <div className="tile-img" style={{ background: grad(e.c1, e.c2) }} />
+      <div className="tile-img" style={tileBg(e)} />
       <div className="tile-vig" />
       <div className="chip">{e.category}</div>
       <div className="ct">
         <div className="dt">
-          {e.date} · {e.venue.toUpperCase()}
+          {e.date}
+          {e.venue ? " · " + e.venue.toUpperCase() : ""}
         </div>
         <div className="nm">{e.title}</div>
       </div>
@@ -117,11 +126,14 @@ function useReel(speed: number) {
   return { reelRef, trackRef };
 }
 
-export default function EventReel() {
-  const rowA = events.slice(0, 6);
-  const rowB = events.slice(6).concat(events.slice(0, 2));
+export default function EventReel({ events }: { events: EventDoc[] }) {
+  const half = Math.ceil(events.length / 2) || 1;
+  const rowA = events.slice(0, half);
+  const rowB = events.slice(half).concat(events.slice(0, Math.max(0, 2)));
   const a = useReel(-0.55);
   const b = useReel(0.42);
+
+  if (!events.length) return null;
 
   return (
     <>
@@ -132,13 +144,15 @@ export default function EventReel() {
           ))}
         </div>
       </div>
-      <div className="reel" ref={b.reelRef} style={{ marginTop: 22 }}>
-        <div className="reel-track" ref={b.trackRef}>
-          {[...rowB, ...rowB].map((e, i) => (
-            <Tile e={e} key={"b" + i} />
-          ))}
+      {rowB.length > 0 && (
+        <div className="reel" ref={b.reelRef} style={{ marginTop: 22 }}>
+          <div className="reel-track" ref={b.trackRef}>
+            {[...rowB, ...rowB].map((e, i) => (
+              <Tile e={e} key={"b" + i} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

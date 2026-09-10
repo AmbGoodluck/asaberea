@@ -1,0 +1,30 @@
+rules_version = '2';
+
+// ASA Berea Firestore rules.
+// Public content is world-readable. All writes go through the server (Admin
+// SDK in the Next.js API routes), which verifies the admin allowlist, so
+// direct client writes are denied everywhere. The inbox is never client-readable.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Public content: anyone can read, only admins (via server) can write.
+    match /events/{doc}       { allow read: if true;  allow write: if isAdmin(); }
+    match /spotlights/{doc}    { allow read: if true;  allow write: if isAdmin(); }
+    match /leadership/{doc}    { allow read: if true;  allow write: if isAdmin(); }
+    match /gallery/{doc}       { allow read: if true;  allow write: if isAdmin(); }
+    match /images/{doc}        { allow read: if true;  allow write: if isAdmin(); }
+    match /stats/{doc}         { allow read: if true;  allow write: if isAdmin(); }
+
+    // Contact inbox: no client access at all. Reads and writes happen only
+    // through the server with the Admin SDK, which bypasses these rules.
+    match /contacts/{doc}      { allow read, write: if false; }
+
+    // Default deny.
+    match /{document=**}       { allow read, write: if false; }
+  }
+}

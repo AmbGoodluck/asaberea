@@ -14,15 +14,15 @@ export default function Footer() {
               </span>
             </div>
             <p style={{ fontSize: "14.5px", color: "var(--on-panel-soft)", margin: "20px 0 0", maxWidth: "34ch", lineHeight: 1.65 }}>
-              The African Students Association — a voice, a home, and a family on Berea&apos;s campus.
+              The African Students Association, a voice, a home, and a family on Berea&apos;s campus.
             </p>
           </div>
           <div className="f-col">
             <div className="lbl">Explore</div>
             <div className="links">
               <Link href="/about">About</Link>
-              <Link href="/stories">Blog &amp; Stories</Link>
               <Link href="/leadership">Leadership</Link>
+              <Link href="/contact">Contact</Link>
             </div>
           </div>
           <div className="f-col">
@@ -38,7 +38,7 @@ export default function Footer() {
             <div className="links">
               <a href="https://instagram.com/asa.berea" target="_blank" rel="noreferrer">Instagram</a>
               <Link href="/about">Join ASA</Link>
-              <Link href="/leadership">Contact the EC</Link>
+              <Link href="/contact">Contact the EC</Link>
             </div>
           </div>
         </div>

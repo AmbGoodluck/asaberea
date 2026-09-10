@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { events } from "@/lib/data";
 import { EventCard } from "./cards";
+import type { EventDoc } from "@/lib/firebase/schema";
 
 const cats = ["all", "Cultural", "Social", "Meeting", "Panel"] as const;
 
-export default function EventsClient() {
+export default function EventsClient({ events }: { events: EventDoc[] }) {
   const [filter, setFilter] = useState<string>("all");
   const wrapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     wrapRef.current?.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
   }, [filter]);
+
   const match = (c: string) => filter === "all" || c === filter;
-  const upcoming = events.filter((e) => e.status === "upcoming" && match(e.category));
-  const past = events.filter((e) => e.status === "past" && match(e.category));
+  const upcoming = events.filter((e) => !e.isPast && match(e.category));
+  const past = events.filter((e) => e.isPast && match(e.category));
 
   return (
     <div ref={wrapRef}>
@@ -32,26 +33,32 @@ export default function EventsClient() {
             ))}
           </div>
           <div className="lbl" style={{ marginBottom: 22 }}>Upcoming</div>
-          <div className="grid3">
-            {upcoming.map((e, i) => (
-              <EventCard e={e} key={i} />
-            ))}
-          </div>
+          {upcoming.length ? (
+            <div className="grid3">
+              {upcoming.map((e) => (
+                <EventCard e={e} key={e.id} />
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: "var(--faint)" }}>No upcoming events in this category yet.</p>
+          )}
         </div>
       </section>
 
-      <section style={{ padding: "40px 0 92px" }}>
-        <div className="wrap">
-          <div className="lbl" style={{ marginBottom: 22, color: "var(--faint)" }}>
-            Past events · the archive
+      {past.length > 0 && (
+        <section style={{ padding: "40px 0 92px" }}>
+          <div className="wrap">
+            <div className="lbl" style={{ marginBottom: 22, color: "var(--faint)" }}>
+              Past events · the archive
+            </div>
+            <div className="grid3">
+              {past.map((e) => (
+                <EventCard e={e} key={e.id} />
+              ))}
+            </div>
           </div>
-          <div className="grid3">
-            {past.map((e, i) => (
-              <EventCard e={e} key={i} />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
