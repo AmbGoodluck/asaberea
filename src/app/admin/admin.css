@@ -72,6 +72,16 @@
 .au-actions{display:flex;gap:8px;flex-wrap:wrap}
 .au-err{color:var(--rust);font-size:13px;margin-top:8px}
 
+/* focal-point (reframe) upload, used for page images */
+.fiu-hint{font-size:12.5px;color:var(--faint);margin:-2px 0 9px;line-height:1.5}
+.fiu-preview{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;background:var(--paper-2) center/cover;
+  border:1px solid var(--hair-2);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.fiu-preview span:not(.fiu-dot){font-size:12px;color:var(--faint)}
+.fiu-preview.clickable{cursor:crosshair}
+.fiu-dot{position:absolute;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);
+  border:2.5px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4);pointer-events:none}
+.fiu-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
 /* gate / login */
 .a-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px}
 .a-gate-card{max-width:440px;width:100%;background:var(--surface);border:1px solid var(--hair);border-radius:22px;

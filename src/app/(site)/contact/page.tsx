@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/links";
+import { getImageSlots } from "@/lib/content";
 
+export const revalidate = 60;
 export const metadata: Metadata = { title: "Contact · ASA Berea" };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const images = await getImageSlots();
+  const side = images["contact-side"];
+
   return (
     <>
       <div className="phead">
@@ -25,20 +30,30 @@ export default function ContactPage() {
             <ContactForm />
           </div>
           <aside className="contact-side reveal s1">
-            <div className="cs-card">
-              <div className="lbl" style={{ color: "var(--rust)" }}>Reach us</div>
-              <h3 className="ny">The ASA family</h3>
-              <p>
-                We meet regularly through the semester and welcome new faces at every event. Membership
-                is open to all Berea students, faculty, and staff.
-              </p>
-              <div className="cs-links">
-                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
-                  <span>Instagram</span>
-                  <span className="cs-handle">{INSTAGRAM_HANDLE}</span>
-                </a>
-                <div className="cs-row"><span>Campus</span><span className="cs-handle">Berea College, Kentucky</span></div>
-                <div className="cs-row"><span>Membership</span><span className="cs-handle">$6 per semester</span></div>
+            <div
+              className="cs-card"
+              style={
+                side?.url
+                  ? { backgroundImage: `url(${side.url})`, backgroundPosition: side.position }
+                  : undefined
+              }
+            >
+              {side?.url && <div className="cs-wash" aria-hidden />}
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div className="lbl" style={{ color: "var(--rust)" }}>Reach us</div>
+                <h3 className="ny">The ASA family</h3>
+                <p>
+                  We meet regularly through the semester and welcome new faces at every event.
+                  Membership is open to all Berea students, faculty, and staff.
+                </p>
+                <div className="cs-links">
+                  <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
+                    <span>Instagram</span>
+                    <span className="cs-handle">{INSTAGRAM_HANDLE}</span>
+                  </a>
+                  <div className="cs-row"><span>Campus</span><span className="cs-handle">Berea College, Kentucky</span></div>
+                  <div className="cs-row"><span>Membership</span><span className="cs-handle">$6 per semester</span></div>
+                </div>
               </div>
             </div>
           </aside>

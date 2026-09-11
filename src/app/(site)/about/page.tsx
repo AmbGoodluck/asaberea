@@ -2,14 +2,27 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { pillars } from "@/lib/data";
 import { SIGNUP_URL } from "@/lib/links";
+import { getImageSlots } from "@/lib/content";
 
+export const revalidate = 60;
 export const metadata: Metadata = { title: "About · ASA Berea" };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const images = await getImageSlots();
+  const hero = images["about-hero"];
+  const story = images["about-story"];
+
   return (
     <>
       <div className="phead">
         <div className="glow" />
+        {hero?.url && (
+          <div
+            className="phead-backdrop"
+            style={{ backgroundImage: `url(${hero.url})`, backgroundPosition: hero.position }}
+            aria-hidden
+          />
+        )}
         <div className="wrap">
           <div className="lbl">About us</div>
           <h1 className="ny">Where Africa <span className="em">meets</span> Berea.</h1>
@@ -33,9 +46,16 @@ export default function AboutPage() {
 
       <section style={{ padding: "20px 0 80px" }}>
         <div className="wrap two-col">
-          <div className="mission-img reveal">
-            <div className="ov" />
-            <div className="grain" style={{ opacity: 0.4 }} />
+          <div
+            className="mission-img reveal"
+            style={
+              story?.url
+                ? { backgroundImage: `url(${story.url})`, backgroundPosition: story.position }
+                : undefined
+            }
+          >
+            {!story?.url && <div className="ov" />}
+            <div className="grain" style={{ opacity: story?.url ? 0.15 : 0.4 }} />
           </div>
           <div className="about-body reveal s1">
             <div className="lbl" style={{ color: "var(--rust)" }}>Our story</div>

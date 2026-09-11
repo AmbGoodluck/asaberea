@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin/AdminProvider";
-import ImageUpload from "@/components/admin/ImageUpload";
+import FocalImageUpload from "@/components/admin/FocalImageUpload";
 import GalleryBulkUpload from "@/components/admin/GalleryBulkUpload";
 import EntityManager, { type Field } from "@/components/admin/EntityManager";
 import { IMAGE_SLOTS } from "@/lib/firebase/schema";
+
+const DEFAULT_FOCAL = "50% 50%";
 
 const galleryFields: Field[] = [
   { key: "imageUrl", label: "Photo", type: "image", folder: "gallery" },
@@ -13,9 +15,11 @@ const galleryFields: Field[] = [
   { key: "order", label: "Order", type: "number" },
 ];
 
+type Slot = { url: string; position: string };
+
 export default function ImagesAdmin() {
   const { authedFetch } = useAdmin();
-  const [slots, setSlots] = useState<Record<string, string>>({});
+  const [slots, setSlots] = useState<Record<string, Slot>>({});
   const [loading, setLoading] = useState(true);
   const [savingSlot, setSavingSlot] = useState<string | null>(null);
   const [galleryKey, setGalleryKey] = useState(0);
@@ -34,11 +38,14 @@ export default function ImagesAdmin() {
     })();
   }, [authedFetch]);
 
-  async function saveSlot(slot: string, url: string) {
-    setSlots((s) => ({ ...s, [slot]: url }));
+  async function saveSlot(slot: string, next: Slot) {
+    setSlots((s) => ({ ...s, [slot]: next }));
     setSavingSlot(slot);
     try {
-      await authedFetch("/api/admin/images", { method: "PUT", body: JSON.stringify({ slot, url }) });
+      await authedFetch("/api/admin/images", {
+        method: "PUT",
+        body: JSON.stringify({ slot, url: next.url, position: next.position }),
+      });
     } finally {
       setSavingSlot(null);
     }
@@ -55,17 +62,22 @@ export default function ImagesAdmin() {
 
       <div className="a-card" style={{ marginBottom: 26 }}>
         <h3>Page images</h3>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, margin: "-10px 0 18px", lineHeight: 1.55 }}>
+          Upload a photo for each spot below, then click anywhere on it to choose what stays in
+          view when it&apos;s cropped to fit the page (a face, a sign, whatever matters most).
+        </p>
         {loading ? (
           <div className="a-empty">Loading...</div>
         ) : (
           <div className="slots-grid">
             {IMAGE_SLOTS.map((slot) => (
               <div key={slot.id}>
-                <ImageUpload
+                <FocalImageUpload
                   label={slot.label + (savingSlot === slot.id ? " (saving...)" : "")}
-                  value={slots[slot.id] || ""}
+                  value={slots[slot.id]?.url || ""}
+                  position={slots[slot.id]?.position || DEFAULT_FOCAL}
                   folder={"slots/" + slot.id}
-                  onChange={(url) => saveSlot(slot.id, url)}
+                  onChange={(next) => saveSlot(slot.id, next)}
                 />
               </div>
             ))}

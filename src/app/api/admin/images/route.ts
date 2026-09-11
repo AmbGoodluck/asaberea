@@ -1,6 +1,6 @@
 import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
 import { fdb } from "@/lib/firestore-rest";
-import { imageSlotInput, COL } from "@/lib/firebase/schema";
+import { imageSlotInput, COL, DEFAULT_FOCAL } from "@/lib/firebase/schema";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,15 +13,15 @@ export async function GET(req: Request) {
   if (!user) return json({ error: "unauthorized" }, 401);
   if (!fdb.enabled) return json({ error: "not_configured" }, 503);
   const docs = (await fdb.list(COL.images)) || [];
-  const items: Record<string, string> = {};
+  const items: Record<string, { url: string; position: string }> = {};
   for (const d of docs) {
-    const url = (d as { url?: string }).url;
-    if (url) items[d.id] = url;
+    const data = d as { url?: string; position?: string };
+    if (data.url) items[d.id] = { url: data.url, position: data.position || DEFAULT_FOCAL };
   }
   return json({ items });
 }
 
-// PUT upsert a slot { slot, url }
+// PUT upsert a slot { slot, url, position? }
 export async function PUT(req: Request) {
   const limited = guardRate(req, "admin-write", 40, 60_000);
   if (limited) return limited;
@@ -38,9 +38,13 @@ export async function PUT(req: Request) {
   const parsed = imageSlotInput.safeParse(body);
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
-  const { slot, url } = parsed.data;
+  const { slot, url, position } = parsed.data;
   if (slot.includes("/")) return json({ error: "bad_slot" }, 400);
-  const ok = await fdb.set(COL.images, slot, { url, updatedAt: Date.now() });
+  const ok = await fdb.set(COL.images, slot, {
+    url,
+    position: position || DEFAULT_FOCAL,
+    updatedAt: Date.now(),
+  });
   if (!ok) return json({ error: "write_failed" }, 502);
-  return json({ slot, url });
+  return json({ slot, url, position: position || DEFAULT_FOCAL });
 }

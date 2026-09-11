@@ -94,7 +94,10 @@ export const IMAGE_SLOTS = [
   { id: "og-share", label: "Social share image" },
 ] as const;
 
-export type ImageSlotDoc = { url: string; updatedAt: number };
+// position is a CSS background-position value, e.g. "50% 35%" — the focal
+// point to keep in view when the image is cropped to fit its frame.
+export type ImageSlotDoc = { url: string; position?: string; updatedAt: number };
+export const DEFAULT_FOCAL = "50% 50%";
 
 // ---- Validation (zod) for admin inputs ----
 const short = z.string().trim().min(1, "This is required").max(160, "That's too long");
@@ -175,6 +178,11 @@ export const statsInput = z.object({
 export const imageSlotInput = z.object({
   slot: z.string().trim().min(1).max(60),
   url: photo,
+  position: z
+    .string()
+    .trim()
+    .regex(/^\d{1,3}% \d{1,3}%$/, "Invalid position")
+    .optional(),
 });
 
 // Public contact form

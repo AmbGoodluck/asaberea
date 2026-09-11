@@ -4,6 +4,7 @@ import { fdb } from "./firestore-rest";
 import {
   COL,
   STATS_DOC,
+  DEFAULT_FOCAL,
   type EventDoc,
   type SpotlightDoc,
   type LeaderDoc,
@@ -119,15 +120,17 @@ export const getGallery = cache(async (): Promise<GalleryDoc[]> => {
   }));
 });
 
+export type ImageSlot = { url: string; position: string };
+
 export const getImageSlots = cache(
-  async (): Promise<Record<string, string>> => {
-    const out: Record<string, string> = {};
+  async (): Promise<Record<string, ImageSlot>> => {
+    const out: Record<string, ImageSlot> = {};
     if (!fdb.enabled) return out;
     try {
       const docs = (await fdb.list(COL.images)) || [];
       for (const d of docs) {
         const data = d as unknown as ImageSlotDoc & { id: string };
-        if (data?.url) out[d.id] = data.url;
+        if (data?.url) out[d.id] = { url: data.url, position: data.position || DEFAULT_FOCAL };
       }
     } catch {}
     return out;

@@ -15,7 +15,7 @@ export default async function HomePage() {
     getSpotlights(),
     getImageSlots(),
   ]);
-  const heroImage = images["home-hero"] || "";
+  const heroImage = images["home-hero"];
   const upcoming = events.filter((e) => !e.isPast).slice(0, 3);
   const reelEvents = events.slice(0, 10);
 
@@ -23,10 +23,10 @@ export default async function HomePage() {
     <>
       <header className="hero">
         <div className="glow" />
-        {heroImage && (
+        {heroImage?.url && (
           <div
             className="hero-backdrop"
-            style={{ backgroundImage: `url(${heroImage})` }}
+            style={{ backgroundImage: `url(${heroImage.url})`, backgroundPosition: heroImage.position }}
             aria-hidden
           />
         )}
@@ -107,6 +107,16 @@ export default async function HomePage() {
                 <div className="lbl">Member Spotlight</div>
                 <h2 className="ny">The people who make us</h2>
               </div>
+              {images["spotlight-feature"]?.url && (
+                <span
+                  className="spot-feature"
+                  style={{
+                    backgroundImage: `url(${images["spotlight-feature"].url})`,
+                    backgroundPosition: images["spotlight-feature"].position,
+                  }}
+                  aria-hidden
+                />
+              )}
             </div>
             <div className="spot-grid">
               {spotlights.slice(0, 3).map((s) => {
