@@ -1,8 +1,8 @@
 import Link from "next/link";
 import EventReel from "@/components/EventReel";
 import AfricaHero from "@/components/AfricaHero";
-import { EventCard, pairFor } from "@/components/cards";
-import { pillars, grad } from "@/lib/data";
+import { EventCard, SpotlightCard } from "@/components/cards";
+import { pillars } from "@/lib/data";
 import { getEvents, getStats, getSpotlights, getImageSlots } from "@/lib/content";
 import { SIGNUP_URL, INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/links";
 
@@ -99,6 +99,23 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="band">
+        <div className="wrap">
+          <div className="shead reveal">
+            <div>
+              <div className="lbl">This semester</div>
+              <h2 className="ny">Gather with us</h2>
+            </div>
+            <Link href="/events" className="seclink">All events →</Link>
+          </div>
+          <div className="grid3">
+            {upcoming.map((e) => (
+              <EventCard e={e} key={e.id} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {spotlights.length > 0 && (
         <section className="sec">
           <div className="wrap">
@@ -119,47 +136,18 @@ export default async function HomePage() {
               )}
             </div>
             <div className="spot-grid">
-              {spotlights.slice(0, 3).map((s) => {
-                const [a, b] = pairFor(s.name);
-                return (
-                  <div className="spot reveal" key={s.id} style={{ position: "relative" }}>
-                    <div className="spot-quote">&ldquo;</div>
-                    <div className="top">
-                      {s.imageUrl ? (
-                        <span className="av" style={{ backgroundImage: `url(${s.imageUrl})` }} />
-                      ) : (
-                        <span className="av" style={{ background: grad(a, b) }}>{s.name[0]}</span>
-                      )}
-                      <div>
-                        <div className="who">{s.name}</div>
-                        <div className="head">{s.headline}</div>
-                      </div>
-                    </div>
-                    <div className="desc">{s.description}</div>
-                  </div>
-                );
-              })}
+              {spotlights.slice(0, 3).map((s) => (
+                <SpotlightCard s={s} key={s.id} />
+              ))}
             </div>
+            {spotlights.length > 3 && (
+              <div style={{ marginTop: 26, textAlign: "center" }}>
+                <Link href="/spotlight" className="seclink">See all spotlights →</Link>
+              </div>
+            )}
           </div>
         </section>
       )}
-
-      <section className="band">
-        <div className="wrap">
-          <div className="shead reveal">
-            <div>
-              <div className="lbl">This semester</div>
-              <h2 className="ny">Gather with us</h2>
-            </div>
-            <Link href="/events" className="seclink">All events →</Link>
-          </div>
-          <div className="grid3">
-            {upcoming.map((e) => (
-              <EventCard e={e} key={e.id} />
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="join">
         <div className="wrap">

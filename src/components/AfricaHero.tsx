@@ -2,23 +2,29 @@
 
 import { useEffect, useRef } from "react";
 
-// Stylized Africa silhouette (motif, not a precise map). Kept smooth and
-// abstract so it reads as an emblem in the Apple sense: simple, iconic, crisp.
+// A simplified but recognizable Africa silhouette: the wide north, the Horn
+// of Africa's point in the northeast, the Gulf of Guinea's inward bite on
+// the west coast, and the taper down to the Cape in the south.
 const AFRICA =
-  "M50 4 C58 4 63 6 66 10 C69 13 71 16 74 17 C78 18 82 19 83 23 C84 27 80 30 79 34 " +
-  "C78 39 80 43 77 47 C74 52 71 55 69 60 C67 66 66 71 62 77 C58 83 55 90 49 92 " +
-  "C45 93 42 90 41 86 C40 81 41 77 38 73 C35 68 31 65 29 59 C27 53 27 47 25 42 " +
-  "C23 38 19 36 19 31 C19 27 22 25 25 22 C29 18 30 13 35 9 C39 6 44 4 50 4 Z";
+  "M32 8 C42 3 56 3 64 9 C70 13 74 18 78 24 C85 26 93 29 90 36 " +
+  "C89 41 83 43 79 40 C78 49 82 57 79 65 C77 73 81 80 74 87 " +
+  "C69 93 60 97 53 95 C47 94 43 90 42 84 C38 78 36 70 35 62 " +
+  "C34 56 30 52 27 50 C30 47 29 43 24 40 C22 34 19 27 22 20 " +
+  "C24 14 28 10 32 8 Z";
+
+// Madagascar, off the southeast coast.
+const MADAGASCAR =
+  "M85 64 C88 63 90 66 89 70 C88 76 87 82 84 86 C82 88 80 85 81 80 C82 74 83 68 85 64 Z";
 
 // A few "nations" that orbit as points of light around the continent.
 const DOTS = [
-  { x: 40, y: 18, d: 0 },
-  { x: 66, y: 26, d: 1.2 },
-  { x: 72, y: 44, d: 2.1 },
-  { x: 58, y: 66, d: 0.6 },
-  { x: 44, y: 80, d: 1.7 },
-  { x: 30, y: 52, d: 2.6 },
-  { x: 28, y: 30, d: 0.9 },
+  { x: 40, y: 15, d: 0 },
+  { x: 62, y: 14, d: 1.2 },
+  { x: 83, y: 33, d: 2.1 },
+  { x: 73, y: 55, d: 0.6 },
+  { x: 58, y: 80, d: 1.7 },
+  { x: 45, y: 60, d: 2.6 },
+  { x: 30, y: 38, d: 0.9 },
 ];
 
 export default function AfricaHero() {
@@ -89,7 +95,9 @@ export default function AfricaHero() {
               </filter>
             </defs>
             <path d={AFRICA} fill="url(#kenteFill)" filter="url(#soft)" />
+            <path d={MADAGASCAR} fill="url(#kenteFill)" filter="url(#soft)" />
             <path d={AFRICA} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="0.6" />
+            <path d={MADAGASCAR} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="0.6" />
             {/* woven texture lines clipped to the continent */}
             <clipPath id="clip"><path d={AFRICA} /></clipPath>
             <g clipPath="url(#clip)" opacity="0.14">

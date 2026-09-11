@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { pillars } from "@/lib/data";
 import { SIGNUP_URL } from "@/lib/links";
 import { getImageSlots } from "@/lib/content";
+import PheadBackdrop from "@/components/PheadBackdrop";
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: "About · ASA Berea" };
@@ -16,13 +17,7 @@ export default async function AboutPage() {
     <>
       <div className="phead">
         <div className="glow" />
-        {hero?.url && (
-          <div
-            className="phead-backdrop"
-            style={{ backgroundImage: `url(${hero.url})`, backgroundPosition: hero.position }}
-            aria-hidden
-          />
-        )}
+        <PheadBackdrop slot={hero} />
         <div className="wrap">
           <div className="lbl">About us</div>
           <h1 className="ny">Where Africa <span className="em">meets</span> Berea.</h1>

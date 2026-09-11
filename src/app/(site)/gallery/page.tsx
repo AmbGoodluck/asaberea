@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import GalleryClient from "@/components/GalleryClient";
-import { getGallery } from "@/lib/content";
+import PheadBackdrop from "@/components/PheadBackdrop";
+import { getGallery, getImageSlots } from "@/lib/content";
 import { BOX_PHOTOS_URL } from "@/lib/links";
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: "Gallery · ASA Berea" };
 
 export default async function GalleryPage() {
-  const items = await getGallery();
+  const [items, images] = await Promise.all([getGallery(), getImageSlots()]);
   return (
     <>
       <div className="phead">
         <div className="glow" />
+        <PheadBackdrop slot={images["gallery-hero"]} />
         <div className="wrap">
           <div className="lbl">Gallery</div>
           <h1 className="ny">Moments, <span className="em">made together</span>.</h1>

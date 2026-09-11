@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import PheadBackdrop from "@/components/PheadBackdrop";
 import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/links";
 import { getImageSlots } from "@/lib/content";
 
@@ -14,6 +15,7 @@ export default async function ContactPage() {
     <>
       <div className="phead">
         <div className="glow" />
+        <PheadBackdrop slot={images["contact-hero"]} />
         <div className="wrap">
           <div className="lbl">Contact</div>
           <h1 className="ny">Say <span className="em">hello</span>.</h1>

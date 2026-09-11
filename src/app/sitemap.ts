@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
-import { getEvents } from "@/lib/content";
+import { getEvents, getSpotlights } from "@/lib/content";
 
 const BASE = "https://asaberea.org";
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticPaths = ["", "/about", "/events", "/leadership", "/gallery", "/store", "/contact"];
+  // /store is intentionally left out while it's hidden.
+  const staticPaths = ["", "/about", "/events", "/leadership", "/gallery", "/spotlight", "/contact"];
   const now = new Date();
 
   const pages: MetadataRoute.Sitemap = staticPaths.map((p) => ({
@@ -25,6 +26,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: e.createdAt ? new Date(e.createdAt) : now,
         changeFrequency: "monthly",
         priority: 0.5,
+      });
+    }
+  } catch {
+    // fall back to static pages only
+  }
+
+  try {
+    const spotlights = await getSpotlights();
+    for (const s of spotlights) {
+      if (!s.slug) continue;
+      pages.push({
+        url: `${BASE}/spotlight/${s.slug}`,
+        lastModified: s.createdAt ? new Date(s.createdAt) : now,
+        changeFrequency: "monthly",
+        priority: 0.4,
       });
     }
   } catch {

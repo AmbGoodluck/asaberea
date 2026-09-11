@@ -11,8 +11,8 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/leadership", label: "Leadership" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/store", label: "Store" },
   { href: "/contact", label: "Contact" },
+  // Store is hidden until it's ready to load; see (site)/store/page.tsx.
 ];
 
 export default function Nav() {

@@ -14,6 +14,7 @@ import {
 } from "./firebase/schema";
 import * as seed from "./data";
 import { slugify } from "./slug";
+import { parseEventDate } from "./event-date";
 
 // Content getters. When the service account is configured they read live data
 // from Firestore over REST; otherwise they return the seed content so the
@@ -43,7 +44,13 @@ export const getEvents = cache(async (): Promise<EventDoc[]> => {
   if (live && live.length) {
     return live
       .map((e) => ({ ...e, slug: e.slug || slugify(e.title) || e.id }))
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      .sort((a, b) => {
+        if (a.isPast !== b.isPast) return a.isPast ? 1 : -1;
+        const ka = parseEventDate(a.date, a.time, a.createdAt || 0);
+        const kb = parseEventDate(b.date, b.time, b.createdAt || 0);
+        // Upcoming: soonest first. Past: most recent first.
+        return a.isPast ? kb - ka : ka - kb;
+      });
   }
   return seed.events.map((e, i) => ({
     id: "seed-" + i,
@@ -75,10 +82,15 @@ export const getEventBySlug = cache(
 
 export const getSpotlights = cache(async (): Promise<SpotlightDoc[]> => {
   const live = await readCollection<SpotlightDoc>(COL.spotlights);
-  if (live && live.length) return live.sort((a, b) => (a.order || 0) - (b.order || 0));
+  if (live && live.length) {
+    return live
+      .map((s) => ({ ...s, slug: s.slug || slugify(s.name) || s.id }))
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
   return seed.spotlights.map((s, i) => ({
     id: "seed-" + i,
     name: s.name,
+    slug: slugify(s.name),
     headline: s.headline,
     description: s.description,
     imageUrl: "",
@@ -86,6 +98,13 @@ export const getSpotlights = cache(async (): Promise<SpotlightDoc[]> => {
     createdAt: 1000 - i,
   }));
 });
+
+export const getSpotlightBySlug = cache(
+  async (slug: string): Promise<SpotlightDoc | null> => {
+    const all = await getSpotlights();
+    return all.find((s) => s.slug === slug) ?? all.find((s) => s.id === slug) ?? null;
+  }
+);
 
 export const getLeadership = cache(async (): Promise<LeaderDoc[]> => {
   const live = await readCollection<LeaderDoc>(COL.leadership);

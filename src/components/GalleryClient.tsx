@@ -31,25 +31,17 @@ function GalleryTile({
   onOpen: () => void;
   onMeasure: () => void;
 }) {
-  const [loaded, setLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const hasImg = Boolean(g.imageUrl);
   // "Feature" tiles get wider on large screens for a collage feel.
   const feature = index % 7 === 3 || ratioOf(g) <= 0.62; // periodic, or wide panoramas
   const wide = (g.w && g.h ? g.w / g.h : 1) >= 1.5;
 
-  // Edge-cached images often finish loading before React attaches the
-  // onLoad handler below, so that event never fires and the photo stays
-  // invisible forever. Catch that on mount by checking img.complete, and
-  // as a last resort reveal it regardless after a short delay.
+  // Photo visibility itself is pure CSS (see .gframe img's animation) so it
+  // never depends on this running. This is only for re-measuring the tile
+  // once the image's real size is known (items saved without stored w/h).
   useEffect(() => {
-    if (imgRef.current?.complete) {
-      setLoaded(true);
-      onMeasure();
-      return;
-    }
-    const t = setTimeout(() => setLoaded(true), 1500);
-    return () => clearTimeout(t);
+    if (imgRef.current?.complete) onMeasure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [g.imageUrl]);
 
@@ -58,11 +50,7 @@ function GalleryTile({
   // DOM at the inner one, which broke clicks on the caption and share icon).
   return (
     <div
-      className={
-        "gtile" +
-        (feature || wide ? " wide" : "") +
-        (loaded || !hasImg ? " ready" : "")
-      }
+      className={"gtile" + (feature || wide ? " wide" : "")}
       data-ratio={ratioOf(g).toFixed(4)}
       role="button"
       tabIndex={0}
@@ -91,11 +79,7 @@ function GalleryTile({
             alt={g.caption || ""}
             loading="lazy"
             decoding="async"
-            onLoad={() => {
-              setLoaded(true);
-              onMeasure();
-            }}
-            onError={() => setLoaded(true)}
+            onLoad={onMeasure}
           />
         ) : (
           <span className="gph">

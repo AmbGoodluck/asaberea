@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { grad } from "@/lib/data";
-import type { EventDoc, LeaderDoc } from "@/lib/firebase/schema";
+import type { EventDoc, LeaderDoc, SpotlightDoc } from "@/lib/firebase/schema";
 import type { Product as SeedProduct } from "@/lib/data";
 
 const PAIRS: [string, string][] = [
@@ -41,6 +41,27 @@ export function EventCard({ e }: { e: EventDoc }) {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </span>
       </div>
+    </Link>
+  );
+}
+
+export function SpotlightCard({ s }: { s: SpotlightDoc }) {
+  const [a, b] = pairFor(s.name);
+  return (
+    <Link href={`/spotlight/${s.slug}`} className="spot reveal card-link" style={{ position: "relative" }}>
+      <div className="spot-quote">&ldquo;</div>
+      <div className="top">
+        {s.imageUrl ? (
+          <span className="av" style={{ backgroundImage: `url(${s.imageUrl})` }} />
+        ) : (
+          <span className="av" style={{ background: grad(a, b) }}>{s.name[0]}</span>
+        )}
+        <div>
+          <div className="who">{s.name}</div>
+          <div className="head">{s.headline}</div>
+        </div>
+      </div>
+      <div className="desc">{s.description}</div>
     </Link>
   );
 }

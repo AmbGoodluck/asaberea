@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { getLeadership } from "@/lib/content";
+import { getLeadership, getImageSlots } from "@/lib/content";
 import { RoleCard } from "@/components/cards";
+import PheadBackdrop from "@/components/PheadBackdrop";
 
 export const revalidate = 60;
 export const metadata: Metadata = { title: "Leadership & Roles · ASA Berea" };
 
 export default async function LeadershipPage() {
-  const roster = await getLeadership();
+  const [roster, images] = await Promise.all([getLeadership(), getImageSlots()]);
   return (
     <>
       <div className="phead">
         <div className="glow" />
+        <PheadBackdrop slot={images["leadership-hero"]} />
         <div className="wrap">
           <div className="lbl">Leadership &amp; Roles</div>
           <h1 className="ny">Meet the <span className="em">Executive Committee</span>.</h1>

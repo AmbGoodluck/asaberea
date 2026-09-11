@@ -34,6 +34,7 @@ export type EventDoc = {
 export type SpotlightDoc = {
   id: string;
   name: string;
+  slug: string; // URL segment, e.g. /spotlight/aminata-k
   headline: string; // accomplishment / talent
   description: string;
   imageUrl: string;
@@ -86,11 +87,15 @@ export type ContactDoc = {
 
 // Named image slots the admin can replace per page.
 export const IMAGE_SLOTS = [
-  { id: "home-hero", label: "Home page hero image (optional backdrop)" },
+  { id: "home-hero", label: "Home page hero image" },
   { id: "about-hero", label: "About page hero" },
   { id: "about-story", label: "About story image" },
+  { id: "events-hero", label: "Events page hero" },
+  { id: "leadership-hero", label: "Leadership page hero" },
+  { id: "gallery-hero", label: "Gallery page hero" },
+  { id: "contact-hero", label: "Contact page hero" },
   { id: "spotlight-feature", label: "Home spotlight feature" },
-  { id: "contact-side", label: "Contact page image" },
+  { id: "contact-side", label: "Contact page card image" },
   { id: "og-share", label: "Social share image" },
 ] as const;
 
@@ -143,6 +148,7 @@ export const eventInput = z.object({
 
 export const spotlightInput = z.object({
   name: short,
+  slug: z.string().trim().max(80).regex(/^[a-z0-9-]*$/, "lowercase letters, numbers and hyphens only, no spaces").default(""),
   headline: short,
   description: z.string().trim().max(1200).default(""),
   imageUrl: photo,

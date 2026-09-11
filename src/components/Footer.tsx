@@ -31,7 +31,7 @@ export default function Footer() {
             <div className="links">
               <Link href="/events">Events</Link>
               <Link href="/gallery">Gallery</Link>
-              <Link href="/store">Store</Link>
+              <Link href="/spotlight">Spotlight</Link>
             </div>
           </div>
           <div className="f-col">

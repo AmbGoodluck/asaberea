@@ -5,6 +5,8 @@ import { sanitizeObject } from "@/lib/sanitize";
 import { COL } from "@/lib/firebase/schema";
 import { slugify } from "@/lib/slug";
 
+const SLUG_SOURCE: Record<string, string> = { events: "title", spotlights: "name" };
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -37,8 +39,9 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
   const data = parsed.data as Record<string, unknown>;
-  if (name === "events" && !data.slug) {
-    data.slug = slugify(String(data.title || ""));
+  const slugSource = SLUG_SOURCE[name];
+  if (slugSource && !data.slug) {
+    data.slug = slugify(String(data[slugSource] || ""));
   }
   const ok = await fdb.set(res.collection, id, data);
   if (!ok) return json({ error: "write_failed" }, 502);

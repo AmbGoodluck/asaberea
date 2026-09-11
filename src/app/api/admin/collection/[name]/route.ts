@@ -5,6 +5,9 @@ import { sanitizeObject } from "@/lib/sanitize";
 import { COL } from "@/lib/firebase/schema";
 import { slugify } from "@/lib/slug";
 
+// Resources with a public detail page get an auto-generated slug from this field.
+const SLUG_SOURCE: Record<string, string> = { events: "title", spotlights: "name" };
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -47,8 +50,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ name: s
   if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
 
   const data = parsed.data as Record<string, unknown>;
-  if (name === "events" && !data.slug) {
-    data.slug = slugify(String(data.title || ""));
+  const slugSource = SLUG_SOURCE[name];
+  if (slugSource && !data.slug) {
+    data.slug = slugify(String(data[slugSource] || ""));
   }
   const doc = { ...data, createdAt: Date.now() };
   const saved = await fdb.add(res.collection, doc);
