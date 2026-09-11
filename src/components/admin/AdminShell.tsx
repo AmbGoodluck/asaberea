@@ -33,11 +33,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     return (
       <Gate>
         <h1>Portal not connected yet</h1>
-        <p>
-          The admin portal is built and ready. Add your Firebase keys to
-          <code> .env.local</code> and restart, then sign in here.
-        </p>
-        <div className="a-note">See README for the exact keys and setup steps.</div>
+        <p>The admin portal isn&apos;t hooked up to the website&apos;s account yet.</p>
+        <div className="a-note">Ask your webmaster to finish the setup, then come back and sign in here.</div>
       </Gate>
     );
   }
