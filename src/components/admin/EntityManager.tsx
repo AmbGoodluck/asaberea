@@ -17,6 +17,21 @@ type Item = Record<string, unknown> & { id: string };
 
 const BULK_BATCH = 25;
 
+// Turn a failed save's response into a message naming the actual field(s)
+// that were wrong, instead of a generic "check the fields" shrug.
+function describeError(e: unknown, fields: Field[]): string {
+  const err = e as { error?: string; issues?: { fieldErrors?: Record<string, string[]> } };
+  if (err.error !== "invalid") return "Could not save. Check your connection and try again.";
+  const fieldErrors = err.issues?.fieldErrors || {};
+  const parts = Object.entries(fieldErrors)
+    .filter(([, msgs]) => Array.isArray(msgs) && msgs.length)
+    .map(([key, msgs]) => {
+      const label = fields.find((f) => f.key === key)?.label || key;
+      return `${label.replace(/\s*\(optional.*?\)/i, "")}: ${msgs[0]}`;
+    });
+  return parts.length ? parts.join(" · ") : "Please check the fields and try again.";
+}
+
 export default function EntityManager({
   resource,
   title,
@@ -37,6 +52,7 @@ export default function EntityManager({
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [msgErr, setMsgErr] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
@@ -73,6 +89,7 @@ export default function EntityManager({
     setEditing(null);
     setForm(emptyForm());
     setMsg(null);
+    setMsgErr(false);
   }
   function startEdit(it: Item) {
     setEditing(it);
@@ -80,11 +97,13 @@ export default function EntityManager({
     for (const field of fields) f[field.key] = it[field.key] ?? (field.type === "toggle" ? false : "");
     setForm(f);
     setMsg(null);
+    setMsgErr(false);
   }
 
   async function save() {
     setSaving(true);
     setMsg(null);
+    setMsgErr(false);
     try {
       const path = editing
         ? `/api/admin/collection/${resource}/${editing.id}`
@@ -95,7 +114,8 @@ export default function EntityManager({
       });
       if (!res.ok) {
         const e = await res.json().catch(() => ({}));
-        setMsg(e.error === "invalid" ? "Please check the fields and try again." : "Could not save.");
+        setMsg(describeError(e, fields));
+        setMsgErr(true);
         return;
       }
       await load();
@@ -157,6 +177,7 @@ export default function EntityManager({
     setBulkBusy(false);
     setBulkProgress(null);
     setSelected(new Set());
+    setMsgErr(Boolean(failed));
     setMsg(
       failed ? `Deleted ${done}, ${failed} failed. Try again for the rest.` : `Deleted ${done} item${done === 1 ? "" : "s"}.`
     );
@@ -240,7 +261,7 @@ export default function EntityManager({
                 Cancel
               </button>
             )}
-            {msg && <span className="a-msg">{msg}</span>}
+            {msg && <span className={"a-msg" + (msgErr ? " err" : "")}>{msg}</span>}
           </div>
         </div>
 

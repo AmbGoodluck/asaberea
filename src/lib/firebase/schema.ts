@@ -97,9 +97,23 @@ export const IMAGE_SLOTS = [
 export type ImageSlotDoc = { url: string; updatedAt: number };
 
 // ---- Validation (zod) for admin inputs ----
-const short = z.string().trim().min(1).max(160);
-const long = z.string().trim().min(1).max(4000);
-const url = z.string().trim().url().max(1000).or(z.literal(""));
+const short = z.string().trim().min(1, "Required").max(160, "Too long");
+const long = z.string().trim().min(1, "Required").max(4000, "Too long");
+const url = z
+  .string()
+  .trim()
+  .url("Must be a full link starting with https://")
+  .max(1000)
+  .or(z.literal(""));
+
+// A user-typed link: accepts a bare domain ("berea.campusgroups.com/x") and
+// adds the https:// prefix for them, but still rejects plain text (spaces).
+const typedLink = z.preprocess((val) => {
+  if (typeof val !== "string") return val;
+  const v = val.trim();
+  if (!v || /^https?:\/\//i.test(v) || /\s/.test(v) || !v.includes(".")) return v;
+  return "https://" + v;
+}, url);
 
 export const eventInput = z.object({
   title: short,
@@ -109,7 +123,7 @@ export const eventInput = z.object({
   date: z.string().trim().max(40),
   time: z.string().trim().max(40),
   venue: z.string().trim().max(120).default(""),
-  link: url.default(""),
+  link: typedLink.default(""),
   category: z.enum(["Cultural", "Social", "Meeting", "Panel"]).default("Cultural"),
   isPast: z.boolean().default(false),
 });

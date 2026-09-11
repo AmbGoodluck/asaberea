@@ -10,7 +10,7 @@ const fields: Field[] = [
   { key: "date", label: "Date", type: "text", placeholder: "SEP 14 or 2026-09-14" },
   { key: "time", label: "Time", type: "text", placeholder: "6:00 PM" },
   { key: "venue", label: "Venue", type: "text", placeholder: "Woods-Penn" },
-  { key: "link", label: "Link (optional)", type: "url", placeholder: "https://..." },
+  { key: "link", label: "RSVP / details link (optional, a URL, not the description)", type: "url", placeholder: "berea.campusgroups.com/event/..." },
   { key: "category", label: "Category", type: "select", options: ["Cultural", "Social", "Meeting", "Panel"] },
   { key: "isPast", label: "This is a past event (show under Past)", type: "toggle" },
 ];

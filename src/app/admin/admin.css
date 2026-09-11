@@ -46,6 +46,7 @@
 .a-btn:disabled{opacity:.5;cursor:default}
 .a-form-actions{display:flex;align-items:center;gap:12px;margin-top:6px}
 .a-msg{font-size:13px;color:var(--teal)}
+.a-msg.err{color:var(--rust)}
 
 .a-list-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px}
 .a-list-bulk{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
