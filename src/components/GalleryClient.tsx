@@ -32,10 +32,26 @@ function GalleryTile({
   onMeasure: () => void;
 }) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
   const hasImg = Boolean(g.imageUrl);
   // "Feature" tiles get wider on large screens for a collage feel.
   const feature = index % 7 === 3 || ratioOf(g) <= 0.62; // periodic, or wide panoramas
   const wide = (g.w && g.h ? g.w / g.h : 1) >= 1.5;
+
+  // Edge-cached images often finish loading before React attaches the
+  // onLoad handler below, so that event never fires and the photo stays
+  // invisible forever. Catch that on mount by checking img.complete, and
+  // as a last resort reveal it regardless after a short delay.
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setLoaded(true);
+      onMeasure();
+      return;
+    }
+    const t = setTimeout(() => setLoaded(true), 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [g.imageUrl]);
 
   // A <div> here, not a <button>: it contains the Share button, and a
   // <button> cannot legally contain another <button> (browsers split the
@@ -70,6 +86,7 @@ function GalleryTile({
         />
         {hasImg ? (
           <img
+            ref={imgRef}
             src={g.imageUrl}
             alt={g.caption || ""}
             loading="lazy"
@@ -78,6 +95,7 @@ function GalleryTile({
               setLoaded(true);
               onMeasure();
             }}
+            onError={() => setLoaded(true)}
           />
         ) : (
           <span className="gph">
