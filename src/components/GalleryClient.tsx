@@ -37,15 +37,26 @@ function GalleryTile({
   const feature = index % 7 === 3 || ratioOf(g) <= 0.62; // periodic, or wide panoramas
   const wide = (g.w && g.h ? g.w / g.h : 1) >= 1.5;
 
+  // A <div> here, not a <button>: it contains the Share button, and a
+  // <button> cannot legally contain another <button> (browsers split the
+  // DOM at the inner one, which broke clicks on the caption and share icon).
   return (
-    <button
+    <div
       className={
         "gtile" +
         (feature || wide ? " wide" : "") +
         (loaded || !hasImg ? " ready" : "")
       }
       data-ratio={ratioOf(g).toFixed(4)}
+      role="button"
+      tabIndex={0}
       onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
       aria-label={g.caption ? `View: ${g.caption}` : "View photo"}
     >
       <span className="gframe">
@@ -79,7 +90,7 @@ function GalleryTile({
         )}
       </span>
       {g.caption ? <span className="cap">{g.caption}</span> : null}
-    </button>
+    </div>
   );
 }
 
