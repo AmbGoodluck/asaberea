@@ -15,6 +15,8 @@ export type Field = {
 
 type Item = Record<string, unknown> & { id: string };
 
+const BULK_BATCH = 25;
+
 export default function EntityManager({
   resource,
   title,
@@ -35,6 +37,9 @@ export default function EntityManager({
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
 
   function emptyForm(): Record<string, unknown> {
     const f: Record<string, unknown> = {};
@@ -60,6 +65,7 @@ export default function EntityManager({
   useEffect(() => {
     load();
     setForm(emptyForm());
+    setSelected(new Set());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resource]);
 
@@ -103,6 +109,57 @@ export default function EntityManager({
   async function remove(it: Item) {
     if (!confirm("Delete this item? This cannot be undone.")) return;
     await authedFetch(`/api/admin/collection/${resource}/${it.id}`, { method: "DELETE" });
+    setSelected((s) => {
+      const next = new Set(s);
+      next.delete(it.id);
+      return next;
+    });
+    await load();
+  }
+
+  function toggle(id: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected((s) => (s.size === items.length ? new Set() : new Set(items.map((i) => i.id))));
+  }
+
+  async function removeSelected() {
+    const ids = Array.from(selected);
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} item${ids.length === 1 ? "" : "s"}? This cannot be undone.`)) return;
+
+    setBulkBusy(true);
+    setBulkProgress({ done: 0, total: ids.length });
+    let done = 0;
+    let failed = 0;
+    for (let i = 0; i < ids.length; i += BULK_BATCH) {
+      const batch = ids.slice(i, i + BULK_BATCH);
+      try {
+        const res = await authedFetch(`/api/admin/collection/${resource}/bulk-delete`, {
+          method: "POST",
+          body: JSON.stringify({ ids: batch }),
+        });
+        const data = await res.json().catch(() => ({}));
+        done += Number(data.deleted) || 0;
+        failed += (data.failed?.length as number) || 0;
+      } catch {
+        failed += batch.length;
+      }
+      setBulkProgress({ done: Math.min(i + batch.length, ids.length), total: ids.length });
+    }
+    setBulkBusy(false);
+    setBulkProgress(null);
+    setSelected(new Set());
+    setMsg(
+      failed ? `Deleted ${done}, ${failed} failed. Try again for the rest.` : `Deleted ${done} item${done === 1 ? "" : "s"}.`
+    );
     await load();
   }
 
@@ -188,7 +245,33 @@ export default function EntityManager({
         </div>
 
         <div className="a-card a-list">
-          <h3>{items.length} item{items.length === 1 ? "" : "s"}</h3>
+          <div className="a-list-head">
+            <h3>
+              {items.length} item{items.length === 1 ? "" : "s"}
+              {selected.size > 0 ? ` · ${selected.size} selected` : ""}
+            </h3>
+            {items.length > 0 && (
+              <div className="a-list-bulk">
+                <label className="a-toggle sm">
+                  <input
+                    type="checkbox"
+                    checked={selected.size > 0 && selected.size === items.length}
+                    onChange={toggleAll}
+                  />
+                  <span>Select all</span>
+                </label>
+                <button
+                  className="a-btn danger sm"
+                  disabled={!selected.size || bulkBusy}
+                  onClick={removeSelected}
+                >
+                  {bulkBusy && bulkProgress
+                    ? `Deleting ${bulkProgress.done}/${bulkProgress.total}...`
+                    : `Delete selected${selected.size ? ` (${selected.size})` : ""}`}
+                </button>
+              </div>
+            )}
+          </div>
           {loading ? (
             <div className="a-empty">Loading...</div>
           ) : items.length === 0 ? (
@@ -196,8 +279,15 @@ export default function EntityManager({
           ) : (
             <ul>
               {items.map((it) => (
-                <li key={it.id}>
+                <li key={it.id} className={selected.has(it.id) ? "sel" : ""}>
                   <div className="a-li-main">
+                    <input
+                      type="checkbox"
+                      className="a-li-check"
+                      checked={selected.has(it.id)}
+                      onChange={() => toggle(it.id)}
+                      aria-label={`Select ${String(it[primaryKey] ?? "item")}`}
+                    />
                     {String(it.imageUrl || "") ? (
                       <span className="a-thumb" style={{ backgroundImage: `url(${it.imageUrl})` }} />
                     ) : (

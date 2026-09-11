@@ -47,10 +47,15 @@
 .a-form-actions{display:flex;align-items:center;gap:12px;margin-top:6px}
 .a-msg{font-size:13px;color:var(--teal)}
 
+.a-list-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.a-list-bulk{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.a-toggle.sm{font-size:13px;gap:7px}
 .a-list ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .a-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;transition:.15s}
 .a-list li:hover{background:var(--paper-2)}
+.a-list li.sel{background:rgba(178,58,32,.08)}
 .a-li-main{display:flex;align-items:center;gap:13px;min-width:0}
+.a-li-check{width:17px;height:17px;flex:0 0 auto;accent-color:var(--rust);cursor:pointer}
 .a-thumb{width:46px;height:46px;border-radius:10px;background:var(--paper-2) center/cover;flex:0 0 auto}
 .a-thumb.ph{background:linear-gradient(140deg,var(--hair),var(--hair-2))}
 .a-li-title{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34ch}
@@ -85,6 +90,7 @@
 .inbox-list{display:flex;flex-direction:column;gap:12px}
 .inbox-item{background:var(--surface);border:1px solid var(--hair);border-radius:16px;padding:20px}
 .inbox-item.unread{border-color:var(--rust)}
+.inbox-item.sel{background:rgba(178,58,32,.08)}
 .inbox-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .inbox-item .from{font-weight:600}
 .inbox-item .email{font-size:13px;color:var(--faint)}
