@@ -1,57 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { grad } from "@/lib/data";
 import { pairFor } from "./cards";
 import ShareStoryButton from "./ShareStoryButton";
+import { frameFor, aspectCss } from "@/lib/gallery-frames";
 import type { GalleryDoc } from "@/lib/firebase/schema";
-
-const GAP = 16;
-const ROW = 8;
 
 function gradientFor(g: GalleryDoc) {
   const [a, b] = g.c1 && g.c2 ? [g.c1, g.c2] : pairFor(g.caption || g.id);
   return grad(a, b);
 }
 
-function ratioOf(g: GalleryDoc): number {
-  if (g.w && g.h) return g.h / g.w;
-  if (g.ratio) return g.ratio;
-  return 1.15;
-}
-
 function GalleryTile({
   g,
   index,
   onOpen,
-  onMeasure,
 }: {
   g: GalleryDoc;
   index: number;
   onOpen: () => void;
-  onMeasure: () => void;
 }) {
-  const imgRef = useRef<HTMLImageElement>(null);
   const hasImg = Boolean(g.imageUrl);
-  // "Feature" tiles get wider on large screens for a collage feel.
-  const feature = index % 7 === 3 || ratioOf(g) <= 0.62; // periodic, or wide panoramas
-  const wide = (g.w && g.h ? g.w / g.h : 1) >= 1.5;
-
-  // Photo visibility itself is pure CSS (see .gframe img's animation) so it
-  // never depends on this running. This is only for re-measuring the tile
-  // once the image's real size is known (items saved without stored w/h).
-  useEffect(() => {
-    if (imgRef.current?.complete) onMeasure();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [g.imageUrl]);
-
-  // A <div> here, not a <button>: it contains the Share button, and a
-  // <button> cannot legally contain another <button> (browsers split the
-  // DOM at the inner one, which broke clicks on the caption and share icon).
+  // A fixed aspect ratio gives every tile a real height up front, so the
+  // gallery lays out cleanly whether or not the image has loaded yet. No JS
+  // measuring, no collapsed tiles.
   return (
     <div
-      className={"gtile" + (feature || wide ? " wide" : "")}
-      data-ratio={ratioOf(g).toFixed(4)}
+      className="gtile"
+      style={{ aspectRatio: aspectCss(frameFor(g, index)) }}
       role="button"
       tabIndex={0}
       onClick={onOpen}
@@ -73,23 +50,14 @@ function GalleryTile({
           aria-hidden
         />
         {hasImg ? (
-          <img
-            ref={imgRef}
-            src={g.imageUrl}
-            alt={g.caption || ""}
-            loading="lazy"
-            decoding="async"
-            onLoad={onMeasure}
-          />
+          <img src={g.imageUrl} alt={g.caption || ""} loading="lazy" decoding="async" />
         ) : (
           <span className="gph">
             <span className="grain" style={{ opacity: 0.4 }} />
           </span>
         )}
         <span className="gsheen" aria-hidden />
-        {hasImg && (
-          <ShareStoryButton imageUrl={g.imageUrl} caption={g.caption} variant="tile" />
-        )}
+        {hasImg && <ShareStoryButton imageUrl={g.imageUrl} caption={g.caption} variant="tile" />}
       </span>
       {g.caption ? <span className="cap">{g.caption}</span> : null}
     </div>
@@ -97,54 +65,7 @@ function GalleryTile({
 }
 
 export default function GalleryClient({ items }: { items: GalleryDoc[] }) {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef(0);
   const [active, setActive] = useState<number | null>(null);
-
-  const layout = useCallback(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const cols = getComputedStyle(grid)
-      .gridTemplateColumns.split(" ")
-      .filter(Boolean).length;
-    const allowWide = cols >= 4;
-
-    // One read pass, then one write pass, to avoid layout thrash.
-    const tiles = Array.from(grid.querySelectorAll<HTMLElement>(".gtile"));
-    const plan = tiles.map((t) => {
-      const isWide = allowWide && t.classList.contains("wide");
-      const w = t.getBoundingClientRect().width || 1;
-      const r = parseFloat(t.dataset.ratio || "1.15");
-      const span = Math.max(1, Math.round((w * r + GAP) / (ROW + GAP)));
-      return { t, isWide, span };
-    });
-    for (const { t, isWide, span } of plan) {
-      t.style.gridColumn = isWide ? "span 2" : "";
-      t.style.gridRowEnd = `span ${span}`;
-    }
-  }, []);
-
-  // Coalesce many layout requests (one per image load) into one per frame.
-  const scheduleLayout = useCallback(() => {
-    cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(layout);
-  }, [layout]);
-
-  useEffect(() => {
-    scheduleLayout();
-    const ro = new ResizeObserver(scheduleLayout);
-    if (gridRef.current) ro.observe(gridRef.current);
-    window.addEventListener("resize", scheduleLayout);
-    const t1 = setTimeout(scheduleLayout, 300);
-    const t2 = setTimeout(scheduleLayout, 1200);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", scheduleLayout);
-      cancelAnimationFrame(rafRef.current);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [scheduleLayout, items]);
 
   const close = useCallback(() => setActive(null), []);
   const step = useCallback(
@@ -172,15 +93,9 @@ export default function GalleryClient({ items }: { items: GalleryDoc[] }) {
 
   return (
     <>
-      <div className="masonry" ref={gridRef}>
+      <div className="masonry">
         {items.map((g, i) => (
-          <GalleryTile
-            key={g.id}
-            g={g}
-            index={i}
-            onOpen={() => setActive(i)}
-            onMeasure={scheduleLayout}
-          />
+          <GalleryTile key={g.id} g={g} index={i} onOpen={() => setActive(i)} />
         ))}
       </div>
 
@@ -221,7 +136,7 @@ export default function GalleryClient({ items }: { items: GalleryDoc[] }) {
                 className="lph"
                 style={{
                   background: gradientFor(current),
-                  aspectRatio: `1 / ${current.ratio || 1}`,
+                  aspectRatio: aspectCss(frameFor(current, active ?? 0)),
                 }}
               />
             )}

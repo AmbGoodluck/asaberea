@@ -42,8 +42,20 @@ export const getStats = cache(async (): Promise<StatsDoc> => {
 export const getEvents = cache(async (): Promise<EventDoc[]> => {
   const live = await readCollection<EventDoc>(COL.events);
   if (live && live.length) {
+    const now = Date.now();
     return live
-      .map((e) => ({ ...e, slug: e.slug || slugify(e.title) || e.id }))
+      .map((e) => {
+        // An event is "past" if the admin marked it past, OR its date has
+        // already gone by. Events whose date can't be parsed keep the stored
+        // flag, so the admin toggle still works for vague dates.
+        const when = parseEventDate(e.date, e.time, NaN);
+        const datePast = Number.isFinite(when) && when < now;
+        return {
+          ...e,
+          slug: e.slug || slugify(e.title) || e.id,
+          isPast: e.isPast || datePast,
+        };
+      })
       .sort((a, b) => {
         if (a.isPast !== b.isPast) return a.isPast ? 1 : -1;
         const ka = parseEventDate(a.date, a.time, a.createdAt || 0);
