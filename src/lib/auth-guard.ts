@@ -1,12 +1,13 @@
 import "server-only";
-import { isAdminEmail, adminEnabled } from "./firebase/admin";
+import { isAllowedAdmin, isOwnerEmail, adminEnabled } from "./firebase/admin";
 import { verifyFirebaseIdToken } from "./verify-token";
 import { rateLimit, clientIp } from "./ratelimit";
 
-export type AdminUser = { uid: string; email: string };
+export type AdminUser = { uid: string; email: string; owner: boolean };
 
 // Verifies the Firebase ID token from the Authorization header and confirms
-// the email is on the admin allowlist. Returns null when unauthorized.
+// the email is allowed in (an env owner, or an email added through the
+// portal). Returns null when unauthorized.
 export async function requireAdmin(req: Request): Promise<AdminUser | null> {
   // Without the service account there is no Firestore to guard yet.
   if (!adminEnabled) return null;
@@ -16,8 +17,9 @@ export async function requireAdmin(req: Request): Promise<AdminUser | null> {
   if (!token) return null;
 
   const user = await verifyFirebaseIdToken(token);
-  if (!user || !user.email || !isAdminEmail(user.email)) return null;
-  return { uid: user.uid, email: user.email };
+  if (!user || !user.email) return null;
+  if (!(await isAllowedAdmin(user.email))) return null;
+  return { uid: user.uid, email: user.email, owner: isOwnerEmail(user.email) };
 }
 
 export function json(data: unknown, status = 200) {

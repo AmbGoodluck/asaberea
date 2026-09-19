@@ -9,6 +9,7 @@ export const COL = {
   images: "images",
   contacts: "contacts",
   stats: "stats",
+  admins: "admins",
 } as const;
 
 export const STATS_DOC = "current";
@@ -53,12 +54,18 @@ export type LeaderDoc = {
   createdAt: number;
 };
 
+// Framing styles an admin can give a gallery photo. "auto" varies the frame
+// by position so a batch reads as a designed collage.
+export const GALLERY_FRAMES = ["auto", "square", "portrait", "tall", "landscape", "wide"] as const;
+export type GalleryFrame = (typeof GALLERY_FRAMES)[number];
+
 export type GalleryDoc = {
   id: string;
   caption: string;
   imageUrl: string;
   order: number;
   createdAt: number;
+  frame?: GalleryFrame; // chosen framing style; "auto"/absent = varied by position
   w?: number; // natural pixel width, when known (no layout shift)
   h?: number; // natural pixel height
   blur?: string; // tiny blurred data URI for a smooth load
@@ -168,6 +175,13 @@ export const galleryInput = z.object({
   caption: z.string().trim().max(160).default(""),
   imageUrl: photo,
   order: z.number().int().min(0).max(9999).default(0),
+  // Tolerant: an empty or unknown value (e.g. an older photo) becomes "auto".
+  frame: z
+    .preprocess(
+      (v) => ((GALLERY_FRAMES as readonly string[]).includes(v as string) ? v : "auto"),
+      z.enum(GALLERY_FRAMES)
+    )
+    .default("auto"),
   w: z.number().int().min(0).max(100000).optional(),
   h: z.number().int().min(0).max(100000).optional(),
   blur: z.string().max(4000).optional(),
@@ -190,6 +204,22 @@ export const imageSlotInput = z.object({
     .regex(/^\d{1,3}% \d{1,3}%$/, "Invalid position")
     .optional(),
 });
+
+// An admin added through the portal (stored in the "admins" collection, keyed
+// by lower-cased email). "role" is a free label like "President", just for the list.
+export type AdminDoc = {
+  id: string;
+  email: string;
+  role: string;
+  addedBy: string;
+  createdAt: number;
+};
+
+export const adminInput = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email").max(200),
+  role: z.string().trim().max(80).default(""),
+});
+export type AdminInput = z.infer<typeof adminInput>;
 
 // Public contact form
 export const contactInput = z.object({
