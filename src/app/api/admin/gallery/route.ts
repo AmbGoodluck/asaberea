@@ -1,7 +1,7 @@
 import { requireAdmin, json, guardRate } from "@/lib/auth-guard";
 import { fdb } from "@/lib/firestore-rest";
 import { sanitizeText } from "@/lib/sanitize";
-import { COL } from "@/lib/firebase/schema";
+import { COL, GALLERY_FRAMES, type GalleryFrame } from "@/lib/firebase/schema";
 import {
   mediaBucket,
   mediaUrl,
@@ -41,6 +41,10 @@ export async function POST(req: Request) {
   const caption = sanitizeText(form.get("caption"), 160);
   const orderRaw = Number(form.get("order"));
   const order = Number.isFinite(orderRaw) ? Math.max(0, Math.min(9999, orderRaw)) : 100;
+  const frameRaw = String(form.get("frame") || "auto");
+  const frame: GalleryFrame = (GALLERY_FRAMES as readonly string[]).includes(frameRaw)
+    ? (frameRaw as GalleryFrame)
+    : "auto";
   const w = Math.round(Number(form.get("w"))) || 0;
   const h = Math.round(Number(form.get("h"))) || 0;
   const blurRaw = String(form.get("blur") || "");
@@ -59,6 +63,7 @@ export async function POST(req: Request) {
     caption,
     imageUrl: url,
     order,
+    frame,
     createdAt: Date.now(),
     ...(w && h ? { w, h } : {}),
     ...(blur ? { blur } : {}),
