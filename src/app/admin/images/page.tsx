@@ -12,6 +12,7 @@ const DEFAULT_FOCAL = "50% 50%";
 const galleryFields: Field[] = [
   { key: "imageUrl", label: "Photo", type: "image", folder: "gallery" },
   { key: "caption", label: "Caption", type: "text", placeholder: "Taste of Africa Night" },
+  { key: "frame", label: "Frame style", type: "select", options: ["auto", "square", "portrait", "tall", "landscape", "wide"] },
   { key: "order", label: "Order", type: "number" },
 ];
 

@@ -32,63 +32,138 @@ export default function AdminsPage() {
     load();
   }, [load]);
 
-  async function add(e: React.›Ü›Q]™[
-HÂˆKœ™]™[Y˜][
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    const clean = email.trim().toLowerCase();
+    if (!clean) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await authedFetch("/api/admin/admins", {
+        method: "POST",
+        body: JSON.stringify({ email: clean, role: role.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setEmail("");
+        setRole("");
+        setMsg({ kind: "ok", text: `Added ${clean}. They can now sign in with Google.` });
+        await load();
+      } else {
+        setMsg({ kind: "err", text: data.message || "Could not add that email. Check it and try again." });
+      }
+    } catch {
+      setMsg({ kind: "err", text: "Something went wrong. Try again." });
+    } finally {
+      setBusy(false);
+    }
+  }
 
-NÂˆÛÛœİÛX[ˆH[XZ[š[J
-KÓİÙ\Ø\ÙJ
-NÂˆYˆ
-XÛX[ŠH™]\›ÂˆÙ]\ŞJYJNÂˆÙ]\ÙÊ[
-NÂˆHÂˆÛÛœİ™\ÈH]ØZ]]]Y™]Ú
-‹Ø\KØYZ[‹ØYZ[œÈ‹ÂˆY]Ùˆ”ÔÕ‹ˆ›ÙNˆ”ÓÓ‹œİš[™ÚYJÈ[XZ[ˆÛX[‹›ÛNˆ›ÛKš[J
-HJKˆJNÂˆÛÛœİ]HH]ØZ]™\ËšœÛÛŠ
-K˜Ø]Ú
+  async function remove(target: string) {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await authedFetch(`/api/admin/admins?email=${encodeURIComponent(target)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setMsg({ kind: "ok", text: `Removed ${target}.` });
+        await load();
+      } else {
+        setMsg({ kind: "err", text: data.message || "Could not remove that admin." });
+      }
+    } catch {
+      setMsg({ kind: "err", text: "Something went wrong. Try again." });
+    } finally {
+      setBusy(false);
+    }
+  }
 
+  return (
+    <div>
+      <div className="a-head">
+        <div>
+          <h1>Admins</h1>
+          <p>Give a trusted person, like the president, access to this portal by adding their email. They sign in with that Google account and manage the site with you.</p>
+        </div>
+      </div>
 
-HOˆ
-ßJJNÂˆYˆ
-™\Ë›ÚÊHÂˆÙ][XZ[
-ˆŠNÂˆÙ]›ÛJˆŠNÂˆÙ]\ÙÊÈÚ[™ˆ›ÚÈ‹^ˆYY	ØÛX[ŸKˆ^HØ[ˆ›İÈÚYÛˆ[ˆÚ]ÛÛÙÛK˜JNÂˆ]ØZ]ØY
+      <div className="a-card" style={{ marginBottom: 26 }}>
+        <h3>Add an admin</h3>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, margin: "-8px 0 16px", lineHeight: 1.55 }}>
+          Use the Google email they will sign in with. Access takes effect immediately, no redeploy needed.
+        </p>
+        <form className="a-form" onSubmit={add}>
+          <div className="a-field">
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="president@gmail.com"
+              disabled={busy}
+              required
+            />
+          </div>
+          <div className="a-field">
+            <label>Role (optional)</label>
+            <input
+              type="text"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="President"
+              maxLength={80}
+              disabled={busy}
+            />
+          </div>
+          <div className="a-form-actions">
+            <button className="a-btn primary" type="submit" disabled={busy}>
+              {busy ? "Working..." : "Add admin"}
+            </button>
+          </div>
+        </form>
+        {msg && (
+          <div className={"a-msg" + (msg.kind === "err" ? " err" : "")} style={{ display: "block", marginTop: 12 }}>
+            {msg.text}
+          </div>
+        )}
+      </div>
 
-NÂˆH[ÙHÂˆÙ]\ÙÊÈÚ[™ˆ™\œˆ‹^ˆ]K›Y\ÜØYÙHÛİ[›İY][XZ[ˆÚXÚÈ][™HYØZ[‹ˆˆJNÂˆBˆHØ]ÚÂˆÙ]\ÙÊÈÚ[™ˆ™\œˆ‹^ˆ”ÛÛY][™ÈÙ[Ü›Û™ËˆHYØZ[‹ˆˆJNÂˆHš[˜[HÂˆÙ]\ŞJ˜[ÙJNÂˆBˆB‚ˆ\Ş[˜È[˜İ[Ûˆ™[[İ™J\™Ù]ˆİš[™ÊHÂˆÙ]\ŞJYJNÂˆÙ]\ÙÊ[
-NÂˆHÂˆÛÛœİ™\ÈH]ØZ]]]Y™]Ú
-Ø\KØYZ[‹ØYZ[œÏÙ[XZ[IÙ[˜ÛÙUT’PÛÛ\Û™[
-\™Ù]
-_XÂˆY]Ùˆ‘SUH‹ˆJNÂˆÛÛœİ]HH]ØZ]™\ËšœÛÛŠ
-K˜Ø]Ú
-
-
-HOˆ
-ßJJNÂˆYˆ
-™\Ë›ÚÊHÂˆÙ]\ÙÊÈÚ[™ˆ›ÚÈ‹^ˆ™[[İ™Y	İ\™Ù]K˜JNÂˆ]ØZ]ØY
-
-NÂˆH[ÙHÂˆÙ]\ÙÊÈÚ[™ˆ™\œˆ‹^ˆ]K›Y\ÜØYÙHÛİ[›İ™[[İ™H]YZ[‹ˆˆJNÂˆBˆHØ]ÚÂˆÙ]\ÙÊÈÚ[™ˆ™\œˆ‹^ˆ”ÛÛY][™ÈÙ[Ü›Û™ËˆHYØZ[‹ˆˆJNÂˆHš[˜[HÂˆÙ]\ŞJ˜[ÙJNÂˆBˆB‚ˆ™]\›ˆ
-ˆ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜KZXY‚ˆ]‚ˆOYZ[œÏÚO‚ˆ‘Ú]™HH\İY\œÛÛ‹ZÙHH™\ÚY[XØÙ\ÜÈÈ\ÈÜ[HY[™ÈZ\ˆ[XZ[ˆ^HÚYÛˆ[ˆÚ]]ÛÛÙÛHXØÛİ[[™X[˜YÙHHÚ]HÚ][İKÜ‚ˆÙ]‚ˆÙ]‚‚ˆ]ˆÛ\ÜÓ˜[YOH˜KXØ\™ˆİ[O^ŞÈX\™Ú[›İÛNˆˆ_O‚ˆÏY[ˆYZ[ÚÏ‚ˆİ[O^ŞÈÛÛÜˆ˜\ŠKZ[šË\ÛÙ
-H‹›ÛÚ^™NˆMX\™Ú[ˆ‹NMœ‹[™RZYÚˆKMH_O‚ˆ\ÙHHÛÛÙÛH[XZ[^HÚ[ÚYÛˆ[ˆÚ]ˆXØÙ\ÜÈZÙ\ÈY™™Xİ[[YYX][K›È™Y\ŞH™YYY‚ˆÜ‚ˆ›Ü›HÛ\ÜÓ˜[YOH˜KY›Ü›HˆÛ”İX›Z]^ØYO‚ˆ]ˆÛ\ÜÓ˜[YOH˜KYšY[‚ˆX™[‘[XZ[ÛX™[‚ˆ[œ]ˆ\OH™[XZ[‚ˆ˜[YO^Ù[XZ[BˆÛÚ[™ÙO^ÊJHOˆÙ][XZ[
-K\™Ù]˜[YJ_BˆXÙZÛ\Hœ™\ÚY[ÛXZ[˜ÛÛH‚ˆ\ØX›Y^Ø\Ş_Bˆ™\]Z\™YˆÏ‚ˆÙ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜KYšY[‚ˆX™[”›ÛH
-Ü[Û˜[
-OÛX™[‚ˆ[œ]ˆ\OH^‚ˆ˜[YO^Ü›Û_BˆÛÚ[™ÙO^ÊJHOˆÙ]›ÛJK\™Ù]˜[YJ_BˆXÙZÛ\H”™\ÚY[‚ˆX^[™İ^ÎBˆ\ØX›Y^Ø\Ş_BˆÏ‚ˆÙ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜KY›Ü›KXXİ[ÛœÈ‚ˆ]ÛˆÛ\ÜÓ˜[YOH˜KXˆš[X\Hˆ\OHœİX›Z]ˆ\ØX›Y^Ø\Ş_O‚ˆØ\ŞHÈ•ÛÜšÚ[™Ë‹‹ˆˆˆYYZ[ˆŸBˆØ]Û‚ˆÙ]‚ˆÙ›Ü›O‚ˆÛ\ÙÈ	‰ˆ
-ˆ]ˆÛ\ÜÓ˜[YO^È˜K[\ÙÈˆ
-È
-\ÙËšÚ[™OOH™\œˆˆÈˆ\œˆˆˆˆŠ_Hİ[O^ŞÈ\Ü^Nˆ˜›ØÚÈ‹X\™Ú[•ÜˆLˆ_O‚ˆÛ\ÙË^BˆÙ]‚ˆ
-_BˆÙ]‚‚ˆ]ˆÛ\ÜÓ˜[YOH˜KXØ\™‚ˆÏ•ÚÈ\ÈXØÙ\ÜÏÚÏ‚ˆÛØY[™ÈÈ
-ˆ]ˆÛ\ÜÓ˜[YOH˜KY[\H“ØY[™Ë‹‹Ù]‚ˆ
-Hˆ
-ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œË[\İ‚ˆÛİÛ™\œË›X\
-
-ÊHOˆ
-ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œË\›İÈˆÙ^O^È›İÛ™\‹Hˆ
-ÈßO‚ˆ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œËY[XZ[ÛßOÙ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œË\İXˆ“İÛ™\‹Ù][ˆÚ]HÛÛ™šYÏÙ]‚ˆÙ]‚ˆÜ[ˆÛ\ÜÓ˜[YOH˜YZ[œËX˜YÙHİÛ™\ˆ”\›X[™[ÜÜ[‚ˆÙ]‚ˆ
-J_BˆØYZ[œË›X\
-
-JHOˆ
-ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œË\›İÈˆÙ^O^ØKšYO‚ˆ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œËY[XZ[ØK™[XZ[OÙ]‚ˆ]ˆÛ\ÜÓ˜[YOH˜YZ[œË\İXˆ‚ˆØKœ›ÛHÈKœ›ÛH
-Èˆ0­ÈˆˆˆŸPYYØK˜YYHÈˆHˆ
-ÈK˜YYHˆˆŸBˆÙ]‚ˆÙ]‚ˆ]ÛˆÛ\ÜÓ˜[YOH˜KXˆÚÜİÛHˆÛÛXÚÏ^Ê
-HOˆ™[[İ™JK™[XZ[
-_H\ØX›Y^Ø\Ş_O‚ˆ™[[İ™BˆØ]Û‚ˆÙ]‚ˆ
-J_BˆÛİÛ™\œË›[™İOOH	‰ˆYZ[œË›[™İOOH	‰ˆ
-ˆ]ˆÛ\ÜÓ˜[YOH˜KY[\H“›ÈYZ[œÈY]Ù]‚ˆ
-_BˆÙ]‚ˆ
-_BˆÙ]‚ˆÙ]‚ˆ
-NÂŸB
+      <div className="a-card">
+        <h3>Who has access</h3>
+        {loading ? (
+          <div className="a-empty">Loading...</div>
+        ) : (
+          <div className="admins-list">
+            {owners.map((o) => (
+              <div className="admins-row" key={"owner-" + o}>
+                <div>
+                  <div className="admins-email">{o}</div>
+                  <div className="admins-sub">Owner, set in site config</div>
+                </div>
+                <span className="admins-badge owner">Permanent</span>
+              </div>
+            ))}
+            {admins.map((a) => (
+              <div className="admins-row" key={a.id}>
+                <div>
+                  <div className="admins-email">{a.email}</div>
+                  <div className="admins-sub">
+                    {a.role ? a.role + " Â· " : ""}Added{a.addedBy ? " by " + a.addedBy : ""}
+                  </div>
+                </div>
+                <button className="a-btn ghost sm" onClick={() => remove(a.email)} disabled={busy}>
+                  Remove
+                </button>
+              </div>
+            ))}
+            {owners.length === 0 && admins.length === 0 && (
+              <div className="a-empty">No admins yet.</div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
