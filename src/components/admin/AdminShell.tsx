@@ -12,6 +12,7 @@ const tabs = [
   { href: "/admin/leadership", label: "Leadership", icon: "M16 11a4 4 0 10-8 0M4 20a8 8 0 0116 0" },
   { href: "/admin/images", label: "Images", icon: "M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5" },
   { href: "/admin/inbox", label: "Inbox", icon: "M3 7l9 6 9-6M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z" },
+  { href: "/admin/admins", label: "Admins", icon: "M16 11a4 4 0 10-8 0M4 20a8 8 0 0114-5.7M18 8v6M15 11h6" },
 ];
 
 function Gate({ children }: { children: React.ReactNode }) {

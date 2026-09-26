@@ -12,31 +12,67 @@ export async function GET(req: Request) {
   const limited = guardRate(req, "admin-read", 120, 60_000);
   if (limited) return limited;
   const user = await requireAdmin(req);
-  if (!user) return*œÛÛŠÈ\œ›Üˆ[˜]]Üš^™YˆKJNÂˆYˆ
-Y™‹™[˜X›Y
-H™]\›ˆœÛÛŠÈ\œ›Üˆ››İØÛÛ™šYİ\™YˆKLÊNÂ‚ˆÛÛœİYYH
-]ØZ]™‹›\İ
-ÓÓ˜YZ[œÊJH×NÂˆYYœÛÜ
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
 
-KŠHOˆ[X™\Š‹˜Ü™X]Y]
-HH[X™\ŠK˜Ü™X]Y]
-JNÂˆ™]\›ˆœÛÛŠÂˆİÛ™\œÎˆİÛ™\‘[XZ[Ê
-KˆYZ[œÎˆYYˆ[İNˆÈ[XZ[ˆ\Ù\‹™[XZ[İÛ™\ˆ\Ù\‹›İÛ™\ˆKˆJNÂŸB‚‹ËÈÔÕØ\KØYZ[‹ØYZ[œÈOˆY[ˆ[XZ[ÈH[İÛ\İ™^Ü\Ş[˜È[˜İ[ÛˆÔÕ
-™\Nˆ™\]Y\İ
-HÂˆÛÛœİ[Z]YHİX\™˜]J™\K˜YZ[‹]Üš]H‹ŒÌ
-NÂˆYˆ
-[Z]Y
-H™]\›ˆ[Z]YÂˆÛÛœİ\Ù\ˆH]ØZ]™\]Z\™PYZ[Š™\JNÂˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛŠÈ\œ›Üˆ[˜]]Üš^™YˆKJNÂˆYˆ
-Y™‹™[˜X›Y
-H™]\›ˆœÛÛŠÈ\œ›Üˆ››İØÛÛ™šYİ\™YˆKLÊNÂ‚ˆ]›ÙNˆ[šÛ›İÛÂˆHÂˆ›ÙHH]ØZ]™\KšœÛÛŠ
-NÂˆHØ]ÚÂˆ™]\›Š§6öâ‡²W'&÷#¢&&Eö§6öâ"ÒÂC“°¢Ğ¢6öç7B6ÆVâÒ6æ—F—¦Tö&¦V7B‚†&öG’óò·Ò’2&V6÷&CÇ7G&–ærÂVæ¶æ÷vãâ“°¢6öç7B'6VBÒFÖ–ä–çWBç6fU'6R†6ÆVâ“°¢–b‚'6VBç7V66W72’&WGW&â§6öâ‡²W'&÷#¢&–çfÆ–B"Â—77VW3¢'6VBæW'&÷"æfÆGFVâ‚’ÒÂC#"“° ¢6öç7B²VÖ–ÂÂ&öÆRÒÒ'6VBæFF°¢–b†—4÷væW$VÖ–Â†VÖ–Â’’°¢&WGW&â§6öâ‡²W'&÷#¢&Ç&VG•ö÷væW""ÂÖW76vS¢%F†BVÖ–Â—2Ç&VG’W&ÖæVçB÷væW"â"ÒÂC’“°¢Ğ¢6öç7BW†—7F–ærÒv—BfF"ævWB„4ôÂæFÖ–ç2ÂVÖ–Â“°¢–b†W†—7F–ær’°¢&WGW&â©Í½¸¡ì•ÉÉ½Èè€‰…±É•…‘å}…‘µ¥¸ˆ°µ•ÍÍ…”è€‰Q¡…Ğ•µ…¥°¥Ì…±É•…‘ä…¸…‘µ¥¸¸ˆô°€ĞÀä¤ì(€ô((€½¹ÍĞ‘½Œ€ôì•µ…¥°°É½±”°…‘‘•‘	äèÕÍ•È¹•µ…¥°°É•…Ñ•‘Ğè…Ñ”¹¹½Ü ¤ôì(€½¹ÍĞ½¬€ô…İ…¥Ğ™‘ˆ¹Í•Ğ¡=0¹…‘µ¥¹Ì°•µ…¥°°‘½Œ¤ì(€¥˜€ …½¬¤É•ÑÕÉ¸©Í½¸¡ì•ÉÉ½Èè€‰İÉ¥Ñ•}™…¥±•ˆô°€ÔÀÈ¤ì(€É•ÑÕÉ¸©Í½¸¡ì¥è•µ…¥°°€¸¸¹‘½Œô°€ÈÀÄ¤ì)ô((¼¼1Q€½…Á¤½…‘µ¥¸½…‘µ¥¹Ìı•µ…¥°ô¸¸¸€´øÉ•µ½Ù”…¸…‘‘•…‘µ¥¸)•áÁ½ÉĞ…Íå¹Œ™Õ¹Ñ¥½¸1Q¡É•ÄèI•ÅÕ•ÍĞ¤ì(€½¹ÍĞ±¥µ¥Ñ•€ôÕ…É‘I…Ñ”¡É•Ä°€‰…‘µ¥¸µİÉ¥Ñ”ˆ°€ĞÀ°€ØÁ|ÀÀÀ¤ì(€¥˜€¡±¥µ¥Ñ•¤É•ÑÕÉ¸±¥µ¥Ñ•ì(€½¹ÍĞÕÍ•È€ô…İ…¥ĞÉ•ÅÕ¥É•‘µ¥¸¡É•Ä¤ì(€¥˜€ …ÕÍ•È¤É•ÑÕÉ¸©Í½¸¡ì•ÉÉ½Èè€‰Õ¹…ÕÑ¡½É¥é•ˆô°€ĞÀÄ¤ì(€¥˜€ …™‘ˆ¹•¹…‰±•¤É•ÑÕÉ¸ªson({ error: "not_configured" }, 503);
+  const added = (await fdb.list(COL.admins)) || [];
+  added.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+  return json({
+    owners: ownerEmails(),
+    admins: added,
+    you: { email: user.email, owner: user.owner },
+  });
+}
+
+// POST /api/admin/admins -> add an email to the allowlist
+export async function POST(req: Request) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
+  const user = await requireAdmin(req);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "bad_json" }, 400);
+  }
+  const clean = sanitizeObject((body ?? {}) as Record<string, unknown>);
+  const parsed = adminInput.safeParse(clean);
+  if (!parsed.success) return json({ error: "invalid", issues: parsed.error.flatten() }, 422);
+
+  const { email, role } = parsed.data;
+  if (isOwnerEmail(email)) {
+    return json({ error: "already_owner", message: "That email is already a permanent owner." }, 409);
+  }
+  const existing = await fdb.get(COL.admins, email);
+  if (existing) {
+    return json({ error: "already_admin", message: "That email is already an admin." }, 409);
+  }
+
+  const doc = { email, role, addedBy: user.email, createdAt: Date.now() };
+  const ok = await fdb.set(COL.admins, email, doc);
+  if (!ok) return json({ error: "write_failed" }, 502);
+  return json({ id: email, ...doc }, 201);
+}
+
+// DELETE /api/admin/admins?email=... -> remove an added admin
+export async function DELETE(req: Request) {
+  const limited = guardRate(req, "admin-write", 40, 60_000);
+  if (limited) return limited;
+  const user = await requireAdmin(req);
+  if (!user) return json({ error: "unauthorized" }, 401);
+  if (!fdb.enabled) return json({ error: "not_configured" }, 503);
 
   const url = new URL(req.url);
   const email = (url.searchParams.get("email") || "").trim().toLowerCase();
   if (!email) return json({ error: "missing_email" }, 400);
   if (isOwnerEmail(email)) {
-    return*œÛÛŠÈ\œ›Üˆ›İÛ™\—Ü›İXİY‹Y\ÜØYÙNˆ“İÛ™\œÈ\™HÙ][ˆHÚ]HÛÛ™šYÈ[™Ø[››İ™H™[[İ™Y\™KˆˆKJNÂˆB‚ˆÛÛœİÚÈH]ØZ]™‹™[
-ÓÓ˜YZ[œË[XZ[
-NÂˆYˆ
-[ÚÊH™]\›ˆœÛÛŠÈ\œ›Üˆ™[]WÙ˜Z[YˆKLŠNÂˆ™]\›ˆœÛÛŠÈÚÎˆYHJNÂŸB
+    return json({ error: "owner_protected", message: "Owners are set in the site config and cannot be removed here." }, 409);
+  }
+
+  const ok = await fdb.del(COL.admins, email);
+  if (!ok) return json({ error: "delete_failed" }, 502);
+  return json({ ok: true });
+}
