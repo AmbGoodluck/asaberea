@@ -109,3 +109,25 @@
 .inbox-item .body{color:var(--ink-soft);font-size:15px;line-height:1.6;white-space:pre-line}
 .inbox-item .actions{display:flex;gap:8px;margin-top:14px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rust);margin-right:7px}
+
+/* Gallery bulk uploader */
+.gup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+.gup-item{display:flex;flex-direction:column;gap:8px}
+.gup-thumb{position:relative;width:100%;border-radius:12px;overflow:hidden;background:var(--paper-2);border:1px solid var(--hair)}
+.gup-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gup-x{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(16,10,4,.6);color:#fff;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center}
+.gup-x:hover{background:rgba(16,10,4,.85)}
+.gup-cap,.gup-frame{width:100%;font-family:inherit;font-size:13px;color:var(--ink);background:var(--paper);
+  border:1px solid var(--hair-2);border-radius:9px;padding:8px 10px;outline:none}
+.gup-cap:focus,.gup-frame:focus{border-color:var(--rust)}
+
+/* Admins tab */
+.admins-list{display:flex;flex-direction:column}
+.admins-row{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px 2px;border-top:1px solid var(--hair)}
+.admins-row:first-child{border-top:0}
+.admins-email{font-size:15px;color:var(--ink);font-weight:500}
+.admins-sub{font-size:12.5px;color:var(--faint);margin-top:3px}
+.admins-badge{font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.admins-badge.owner{color:var(--teal);background:rgba(31,122,110,.1)}
