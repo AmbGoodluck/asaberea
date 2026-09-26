@@ -1,0 +1,29 @@
+/* Gallery layout, loaded after globals.css so these rules win.
+   Framed collage masonry: every tile carries a fixed aspect ratio (set inline
+   in GalleryClient), so the columns lay out cleanly with no JS measuring and
+   no collapsed tiles even before images load. This file fully overrides the
+   older grid-based .masonry/.gtile rules, resetting the grid properties they
+   set so the switch to CSS columns is clean. */
+.masonry {
+  display: block;
+  column-count: 2;
+  column-gap: 16px;
+  grid-template-columns: none;
+  grid-auto-rows: auto;
+  gap: 0;
+  align-items: initial;
+}
+@media (min-width: 560px) {
+  .masonry { column-count: 3; }
+}
+@media (min-width: 900px) {
+  .masonry { column-count: 4; }
+}
+@media (min-width: 1280px) {
+  .masonry { column-count: 5; }
+}
+.gtile {
+  grid-row-end: auto;
+  break-inside: avoid;
+  margin: 0 0 16px;
+}

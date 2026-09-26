@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Newsreader } from "next/font/google";
 import "./globals.css";
+import "./gallery.css";
 import { getImageSlots } from "@/lib/content";
 
 // Self-hosted (no render-blocking request to Google, no extra DNS/TLS).

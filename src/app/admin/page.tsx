@@ -9,6 +9,7 @@ const cards = [
   { href: "/admin/leadership", title: "Leadership", desc: "Manage the Executive Committee roster." },
   { href: "/admin/images", title: "Images", desc: "Swap the hero and page images for the whole site." },
   { href: "/admin/inbox", title: "Inbox", desc: "Read messages sent through the contact form." },
+  { href: "/admin/admins", title: "Admins", desc: "Give the president or others access to this portal." },
 ];
 
 export default function AdminOverview() {
