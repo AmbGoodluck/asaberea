@@ -13,3 +13,5 @@ Runtime configuration lives in the Cloudflare dashboard, not in the repo:
 
 Additional admins are added from the site's `/admin` -> Admins tab and take
 effect without a redeploy.
+
+<!-- CI connected: Cloudflare Workers Builds deploys master automatically. -->
